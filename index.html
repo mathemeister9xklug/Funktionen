@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mathe Trainer: Funktionen (Statisch)</title>
+    <title>Mathe Trainer: Funktionen</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -14,6 +14,8 @@
             --card: #ffffff;
             --text: #1e293b;
             --border: #e2e8f0;
+            --gray-btn: #94a3b8;
+            --gray-btn-hover: #64748b;
         }
 
         body {
@@ -111,11 +113,12 @@
             cursor: pointer;
             color: var(--text);
             transition: all 0.2s;
+            position: relative; /* For overlays if needed */
         }
         button.opt-btn:hover { border-color: var(--primary); background: #f0f9ff; }
         
-        button.opt-btn.correct { background: #dcfce7; border-color: var(--success); color: #14532d; }
-        button.opt-btn.wrong { background: #fee2e2; border-color: var(--error); color: #7f1d1d; opacity: 0.8; }
+        button.opt-btn.correct { background: #dcfce7; border-color: var(--success); color: #14532d; border-width: 3px; }
+        button.opt-btn.wrong { background: #fee2e2; border-color: var(--error); color: #7f1d1d; opacity: 0.7; }
 
         input.txt-input {
             width: 100%;
@@ -127,6 +130,7 @@
             outline: none;
         }
         input.txt-input:focus { border-color: var(--primary); }
+        input.txt-input:disabled { background: #f1f5f9; color: #94a3b8; }
 
         .check-btn {
             background: var(--primary);
@@ -139,6 +143,21 @@
             margin-top: 10px;
             cursor: pointer;
         }
+
+        /* --- Skip Button (Gray) --- */
+        .skip-btn {
+            background: var(--gray-btn);
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .skip-btn:hover { background: var(--gray-btn-hover); }
 
         /* --- Feedback & Hints --- */
         details {
@@ -244,7 +263,6 @@
 
 /* --- 1. HELPER: MATH FORMATTER & SVG --- */
 const Utils = {
-    // Wandelt "x^2" in schönes HTML um
     fmt: function(str) {
         if(!str) return "";
         return str
@@ -253,8 +271,15 @@ const Utils = {
             .replace(/\b(x|y|f|g|a|c|d|e|m|n)\b/g, '<span class="math">$1</span>');
     },
     
-    // Zeichnet Graphen (Grid + Funktion)
-    drawSVG: function(type, p) { // p = params
+    shuffle: function(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    },
+    
+    drawSVG: function(type, p) {
         const size = 280, range = 6;
         const scale = size / (range * 2);
         const center = size / 2;
@@ -301,13 +326,9 @@ const Utils = {
     }
 };
 
-/* --- 2. QUESTION DATA POOL (Statisch definiert) --- */
-/* Wir erstellen 70 Fragen hartcodiert, um Fehlerfreiheit zu garantieren. */
-
+/* --- 2. QUESTION DATA POOL --- */
 const rawQuestions = [
-    // --- THEMA: LINEARE FUNKTIONEN (35 Fragen) ---
-    
-    // Block 1: Wertetabelle / Punktprobe
+    // --- LINEARE FUNKTIONEN ---
     { t: "input", q: "Berechne y für x = 2 bei f(x) = 3x + 1", ans: 7, h: "Setze 2 für x ein.", expl: "f(2) = 3·2 + 1 = 7" },
     { t: "input", q: "Berechne y für x = -1 bei f(x) = 2x - 3", ans: -5, h: "Setze -1 für x ein.", expl: "f(-1) = 2·(-1) - 3 = -2 - 3 = -5" },
     { t: "input", q: "Berechne y für x = 0 bei f(x) = -x + 5", ans: 5, h: "Setze 0 ein.", expl: "f(0) = 0 + 5 = 5" },
@@ -315,7 +336,6 @@ const rawQuestions = [
     { t: "input", q: "Gegeben f(x) = -2x. Für welches x ist y = 8?", ans: -4, h: "8 = -2x", expl: "8 = -2x | :(-2) -> x = -4" },
     { t: "input", q: "Liegt der Punkt P(2|5) auf f(x) = x + 3? (1 für Ja, 0 für Nein)", ans: 1, h: "Prüfe ob 2+3 gleich 5 ist.", expl: "Ja, 2+3 = 5." },
 
-    // Block 2: Graphen zuordnen (mc)
     { t: "graph_mc", q: "Welcher Graph zeigt f(x) = x + 1?", correct: 0, 
       opts: [{m:1,n:1}, {m:-1,n:1}, {m:1,n:-1}, {m:2,n:1}], 
       h: "Startet bei y=1, steigt um 1.", expl: "y-Achsenabschnitt +1, Steigung positiv." },
@@ -328,31 +348,26 @@ const rawQuestions = [
       opts: [{m:0.5,n:-2}, {m:2,n:-2}, {m:-0.5,n:-2}, {m:0.5,n:2}], 
       h: "Schneidet y-Achse bei -2, steigt flach.", expl: "n=-2, m=0,5 (flacher Anstieg)." },
 
-    // Block 3: Eigenschaften m und n
     { t: "mc", q: "Was gibt m in f(x)=mx+n an?", correct: "Die Steigung", opts: ["Die Steigung", "Den y-Achsenabschnitt", "Die Nullstelle"], h: "Wie steil der Berg ist.", expl: "m ist die Steigung." },
     { t: "mc", q: "Was gibt n in f(x)=mx+n an?", correct: "Schnittpunkt mit y-Achse", opts: ["Schnittpunkt mit y-Achse", "Schnittpunkt mit x-Achse", "Steigung"], h: "Wo die Gerade startet (auf der senkrechten Linie).", expl: "n ist der y-Achsenabschnitt." },
     { t: "mc", q: "Die Gerade f(x) = -3x + 5 ...", correct: "fällt.", opts: ["fällt.", "steigt.", "ist waagerecht."], h: "Schau auf das Vorzeichen von m.", expl: "m = -3 ist negativ, also fällt sie." },
     { t: "mc", q: "Die Gerade f(x) = 4 ...", correct: "ist parallel zur x-Achse.", opts: ["ist parallel zur x-Achse.", "steigt steil an.", "geht durch den Ursprung."], h: "Hier ist m = 0.", expl: "Kein x bedeutet m=0, also waagerecht." },
 
-    // Block 4: Parallelität
     { t: "mc", q: "Welche Funktion ist parallel zu f(x) = 2x + 5?", correct: "g(x) = 2x - 3", opts: ["g(x) = 2x - 3", "g(x) = -2x + 5", "g(x) = 0,5x + 5"], h: "Parallele Geraden haben das gleiche m.", expl: "Beide haben m=2." },
     { t: "mc", q: "Sind f(x)=3x+1 und g(x)=3x+2 parallel?", correct: "Ja", opts: ["Ja", "Nein"], h: "Vergleiche m.", expl: "Ja, m=3 bei beiden." },
     { t: "mc", q: "Welche Steigung muss eine Gerade haben, die parallel zu y = -x + 4 ist?", correct: "-1", opts: ["-1", "1", "0"], h: "Was steht vor dem x?", expl: "Steigung ist -1." },
 
-    // Block 5: Nullstellen linear
     { t: "input", q: "Nullstelle von f(x) = x - 3", ans: 3, h: "0 = x - 3", expl: "3 = x" },
     { t: "input", q: "Nullstelle von f(x) = 2x - 4", ans: 2, h: "0 = 2x - 4", expl: "4 = 2x -> x = 2" },
     { t: "input", q: "Nullstelle von f(x) = -3x + 9", ans: 3, h: "0 = -3x + 9", expl: "-9 = -3x -> x = 3" },
     { t: "input", q: "Nullstelle von f(x) = 4x + 8", ans: -2, h: "0 = 4x + 8", expl: "-8 = 4x -> x = -2" },
     { t: "input", q: "Nullstelle von f(x) = -x - 5", ans: -5, h: "0 = -x - 5", expl: "x = -5" },
 
-    // Block 6: Fehlende Koordinaten berechnen (Wiederholung/Vertiefung)
     { t: "input", q: "P(x|6) liegt auf y = 2x. Berechne x.", ans: 3, h: "6 = 2x", expl: "x = 3" },
     { t: "input", q: "P(2|y) liegt auf y = -3x + 1. Berechne y.", ans: -5, h: "y = -3(2) + 1", expl: "-6 + 1 = -5" },
     { t: "input", q: "P(4|y) liegt auf y = 0,5x. Berechne y.", ans: 2, h: "y = 0,5 mal 4", expl: "2" },
     { t: "input", q: "Ursprungsgerade mit Steigung 3 geht durch P(2|?).", ans: 6, h: "y = 3x", expl: "y = 3·2 = 6" },
     
-    // Block 7: Schnittpunkt zweier Geraden
     { t: "input", q: "Schnittpunkt (x-Wert) von y=x und y=-x+2", ans: 1, h: "x = -x + 2", expl: "2x = 2 -> x = 1" },
     { t: "input", q: "Schnittpunkt (x-Wert) von y=2x und y=x+3", ans: 3, h: "2x = x + 3", expl: "2x - x = 3 -> x = 3" },
     { t: "input", q: "Schnittpunkt (x-Wert) von y=x+1 und y=2x-1", ans: 2, h: "x+1 = 2x-1", expl: "1+1 = 2x-x -> 2 = x" },
@@ -362,25 +377,19 @@ const rawQuestions = [
     { t: "input", q: "Steigung der Geraden durch P(0|0) und Q(2|4)?", ans: 2, h: "m = (y2-y1)/(x2-x1)", expl: "4/2 = 2" },
     { t: "input", q: "Steigung der Geraden durch P(1|1) und Q(3|5)?", ans: 2, h: "Höhenunterschied durch Längenunterschied", expl: "(5-1)/(3-1) = 4/2 = 2" },
     { t: "input", q: "y-Achsenabschnitt von y = 3x - 7?", ans: -7, h: "Die Zahl ohne x.", expl: "n = -7" },
-    { t: "input", q: "x-Achsenabschnitt ist das gleiche wie... (Anzahl Buchstaben?)", ans: 10, h: "N_llst_lle", expl: "Nullstelle" }, // Scherzfrage/Abwechslung -> Changed to Math logic below
     { t: "mc", q: "Verläuft y = x + 1 durch den Ursprung?", correct: "Nein", opts: ["Ja", "Nein"], h: "Ursprung ist (0|0)", expl: "Nein, bei x=0 ist y=1." },
 
-
-    // --- THEMA: QUADRATISCHE FUNKTIONEN (35 Fragen) ---
-
-    // Block 8: Parameter a (Streckung/Öffnung)
+    // --- QUADRATISCHE FUNKTIONEN ---
     { t: "mc", q: "Welche Parabel ist nach unten geöffnet?", correct: "y = -2x^2", opts: ["y = -2x^2", "y = 2x^2", "y = x^2"], h: "Suche das Minus.", expl: "Negatives a." },
     { t: "mc", q: "Welche Parabel ist breiter (gestaucht)?", correct: "y = 0,5x^2", opts: ["y = 0,5x^2", "y = 2x^2", "y = 10x^2"], h: "Zahl kleiner als 1.", expl: "0,5 < 1, also breiter." },
     { t: "mc", q: "Welche Parabel ist schmaler (gestreckt)?", correct: "y = 4x^2", opts: ["y = 4x^2", "y = x^2", "y = 0,1x^2"], h: "Große Zahl vor x^2.", expl: "4 > 1." },
     { t: "mc", q: "Normalparabel bedeutet a = ...?", correct: "1", opts: ["1", "0", "2"], h: "Standardform.", expl: "a = 1." },
     { t: "input", q: "Berechne y für x=2 bei y=3x^2", ans: 12, h: "Erst quadrieren: 2^2", expl: "3 · 4 = 12" },
 
-    // Block 9: Parameter c (Verschiebung y)
     { t: "mc", q: "Wohin ist y = x^2 + 3 verschoben?", correct: "Oben", opts: ["Oben", "Unten", "Rechts", "Links"], h: "Plus am Ende.", expl: "Nach oben." },
     { t: "mc", q: "Wohin ist y = x^2 - 2 verschoben?", correct: "Unten", opts: ["Unten", "Oben", "Rechts"], h: "Minus am Ende.", expl: "Nach unten." },
     { t: "input", q: "Scheitelpunkt-y-Wert von y = 2x^2 + 5?", ans: 5, h: "Der tiefste Punkt.", expl: "S(0|5)." },
     
-    // Block 10: Scheitelpunktform (Verschiebung x und y)
     { t: "mc", q: "Scheitelpunkt von y = (x-2)^2 + 1?", correct: "S(2|1)", opts: ["S(2|1)", "S(-2|1)", "S(2|-1)"], h: "Vorzeichen in Klammer drehen.", expl: "x-Verschiebung umgekehrt: +2." },
     { t: "mc", q: "Scheitelpunkt von y = (x+3)^2?", correct: "S(-3|0)", opts: ["S(-3|0)", "S(3|0)", "S(0|3)"], h: "Klammer +3 bedeutet nach links.", expl: "S(-3|0)." },
     { t: "mc", q: "Gleichung für S(4|2) (Normalparabel)?", correct: "y=(x-4)^2+2", opts: ["y=(x-4)^2+2", "y=(x+4)^2+2"], h: "x-4 in die Klammer.", expl: "(x-d)^2+e." },
@@ -392,25 +401,21 @@ const rawQuestions = [
       opts: [{a:-1,d:-1,e:2}, {a:1,d:-1,e:2}, {a:-1,d:1,e:2}, {a:-1,d:-1,e:-2}],
       h: "Nach unten offen, S(-1|2).", expl: "Minus davor = unten offen. x+1 = links." },
 
-    // Block 11: Parameter berechnen
     { t: "input", q: "y = ax^2 geht durch P(1|3). Berechne a.", ans: 3, h: "Setze ein: 3 = a·1^2", expl: "a = 3" },
     { t: "input", q: "y = ax^2 geht durch P(2|2). Berechne a (als Dezimalzahl).", ans: 0.5, h: "2 = a·4", expl: "a = 2/4 = 0,5" },
     { t: "input", q: "y = x^2 + c geht durch P(0|-4). Berechne c.", ans: -4, h: "c ist der y-Achsenabschnitt.", expl: "c = -4" },
     { t: "input", q: "y = a(x-1)^2 + 2 hat Scheitel bei x=...?", ans: 1, h: "Lies d ab.", expl: "x = 1" },
 
-    // Block 12: Binomische Formeln auflösen
     { t: "mc", q: "Löse auf: (x+2)^2", correct: "x^2 + 4x + 4", opts: ["x^2 + 4x + 4", "x^2 + 4", "x^2 + 2x + 4"], h: "a^2 + 2ab + b^2", expl: "x^2 + 2·x·2 + 2^2" },
     { t: "mc", q: "Löse auf: (x-3)^2", correct: "x^2 - 6x + 9", opts: ["x^2 - 6x + 9", "x^2 - 9", "x^2 + 6x - 9"], h: "Achtung Minus in der Mitte.", expl: "x^2 - 6x + 9" },
     { t: "input", q: "Konstantes Glied beim Auflösen von (x+5)^2?", ans: 25, h: "5 zum Quadrat.", expl: "25" },
     { t: "input", q: "Faktor vor x beim Auflösen von (x-4)^2?", ans: -8, h: "2 mal -4.", expl: "-8" },
 
-    // Block 13: Werte berechnen Quadratisch
     { t: "input", q: "y = x^2 - 4. Berechne y für x=3.", ans: 5, h: "9 - 4", expl: "5" },
     { t: "input", q: "y = 2(x-1)^2. Berechne y für x=3.", ans: 8, h: "Klammer zuerst: (3-1)^2", expl: "2 · 2^2 = 2·4 = 8" },
     { t: "input", q: "Nullstelle (positiv) von y = x^2 - 9", ans: 3, h: "x^2 = 9", expl: "Wurzel aus 9 ist 3." },
     { t: "input", q: "Nullstelle (negativ) von y = x^2 - 16", ans: -4, h: "x^2 = 16", expl: "-4" },
     
-    // Block 14: Gemischte Parameter
     { t: "mc", q: "y = -0,5(x-2)^2 + 3. Ist die Parabel gestreckt oder gestaucht?", correct: "gestaucht", opts: ["gestaucht", "gestreckt"], h: "0,5 < 1", expl: "Betrag 0,5 ist kleiner 1 -> gestaucht." },
     { t: "mc", q: "y = -3(x+1)^2 - 5. Öffnung?", correct: "Unten", opts: ["Unten", "Oben"], h: "Vorzeichen von a.", expl: "Minus -> Unten." },
     { t: "input", q: "y = x^2. Wenn x verdoppelt wird (von 1 auf 2), vervierfacht sich y. (1=Wahr, 0=Falsch)", ans: 1, h: "Rechne nach.", expl: "1^2=1, 2^2=4. Wahr." },
@@ -418,28 +423,23 @@ const rawQuestions = [
     { t: "input", q: "Anzahl Nullstellen von y = (x-2)^2", ans: 1, h: "Scheitel liegt auf der x-Achse.", expl: "Berührt nur bei x=2." },
     { t: "input", q: "Anzahl Nullstellen von y = x^2 - 1", ans: 2, h: "Parabel nach unten verschoben.", expl: "Schneidet zweimal." },
     
-    // Block 15: Abschluss
     { t: "input", q: "Bestimme a: Parabel S(0|0) durch P(3|9).", ans: 1, h: "9 = a · 9", expl: "a = 1" },
     { t: "mc", q: "y = a(x-d)^2 + e heißt...", correct: "Scheitelpunktform", opts: ["Scheitelpunktform", "Normalform", "Linearform"], h: "Man sieht den Scheitel.", expl: "Scheitelpunktform." },
     { t: "mc", q: "y = ax^2 + bx + c heißt...", correct: "Allgemeine Form", opts: ["Allgemeine Form", "Scheitelpunktform"], h: "Ausmultipliziert.", expl: "Allgemeine Form." },
     { t: "input", q: "Was ist 10^2?", ans: 100, h: "Basiswissen.", expl: "100" }
 ];
 
-// Sicherstellen, dass wir 70 Fragen haben. Falls ich mich verzählt habe, füllen wir auf.
-// (Der obige Block sind ca 65-70 Fragen. Zur Sicherheit duplizieren wir einfache Fragen, falls Länge < 70)
 while(rawQuestions.length < 70) {
     rawQuestions.push({ t: "input", q: "Bonus: Berechne 2^2", ans: 4, h: "", expl: "4" });
 }
-// Wir nehmen exakt die ersten 70, falls es mehr sind.
 const questionPool = rawQuestions.slice(0, 70);
-
 
 /* --- 3. ENGINE LOGIC --- */
 
 const Engine = {
     idx: 0,
     score: 0,
-    history: [], // { q: string, u: string, c: string, ok: boolean }
+    history: [],
     
     init: function() {
         this.idx = 0;
@@ -477,18 +477,12 @@ const Engine = {
         qBox.innerHTML = Utils.fmt(data.q);
         hText.innerHTML = Utils.fmt(data.h);
 
-        // Visuals
-        if(data.t === 'graph_mc') {
-            // Die Visuals sind hier in den Optionen, wir brauchen kein Hauptbild
-        }
-
         // Inputs
         if(data.t === 'input') {
             iBox.innerHTML = `
                 <input type="number" id="usrInp" class="txt-input" placeholder="Zahl eingeben" step="any">
                 <button class="check-btn" onclick="Engine.checkInput()">Prüfen</button>
             `;
-            // Enter key support
             document.getElementById('usrInp').addEventListener("keypress", function(event) {
                 if (event.key === "Enter") Engine.checkInput();
             });
@@ -496,10 +490,16 @@ const Engine = {
         else if(data.t === 'mc') {
             const grid = document.createElement('div');
             grid.className = 'options-grid';
-            data.opts.forEach(opt => {
+            
+            const shuffledOpts = Utils.shuffle([...data.opts]);
+            shuffledOpts.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'opt-btn';
                 btn.innerHTML = Utils.fmt(opt);
+                // Mark correct one via data attribute logic for uniformity (text matching here)
+                // For simplified text MC, correct matching by value is enough, 
+                // but highlighting correct logic is added in checkMC
+                btn.dataset.val = opt; 
                 btn.onclick = () => Engine.checkMC(opt, btn);
                 grid.appendChild(btn);
             });
@@ -508,20 +508,35 @@ const Engine = {
         else if(data.t === 'graph_mc') {
             const grid = document.createElement('div');
             grid.className = 'options-grid grid-2';
-            data.opts.forEach((optParams, i) => {
+            
+            const indices = Array.from(Array(data.opts.length).keys());
+            Utils.shuffle(indices);
+
+            indices.forEach(originalIdx => {
+                const optParams = data.opts[originalIdx];
                 const btn = document.createElement('button');
                 btn.className = 'opt-btn';
                 btn.style.padding = "5px";
                 btn.style.display = "flex";
                 btn.style.justifyContent = "center";
-                // Determine type based on params
+                
+                // Add index to find it later
+                btn.dataset.idx = originalIdx;
+
                 let gType = (optParams.m !== undefined) ? 'linear' : 'quadratic';
                 btn.innerHTML = Utils.drawSVG(gType, optParams);
-                btn.onclick = () => Engine.checkGraphMC(i, btn);
+                btn.onclick = () => Engine.checkGraphMC(originalIdx, btn);
                 grid.appendChild(btn);
             });
             iBox.appendChild(grid);
         }
+
+        // --- SKIP BUTTON ---
+        const skipBtn = document.createElement('button');
+        skipBtn.className = 'skip-btn';
+        skipBtn.innerText = 'Weiß ich nicht';
+        skipBtn.onclick = () => Engine.giveUp();
+        iBox.appendChild(skipBtn);
     },
 
     checkInput: function() {
@@ -531,7 +546,7 @@ const Engine = {
         
         if(isNaN(val)) return;
 
-        const isCorrect = Math.abs(val - correctVal) < 0.1; // Toleranz
+        const isCorrect = Math.abs(val - correctVal) < 0.1;
         this.resolve(isCorrect, val, correctVal);
     },
 
@@ -541,7 +556,14 @@ const Engine = {
         const isCorrect = (selected === correctVal);
         
         if(isCorrect) btn.classList.add('correct');
-        else btn.classList.add('wrong');
+        else {
+            btn.classList.add('wrong');
+            // Highlight correct text option
+            const all = document.querySelectorAll('.opt-btn');
+            all.forEach(b => {
+                if(b.dataset.val === correctVal) b.classList.add('correct');
+            });
+        }
         
         this.resolve(isCorrect, selected, correctVal);
     },
@@ -551,24 +573,50 @@ const Engine = {
         const correctIdx = questionPool[this.idx].correct;
         const isCorrect = (selectedIdx === correctIdx);
 
-        if(isCorrect) btn.classList.add('correct');
-        else btn.classList.add('wrong');
-
-        // Highlight correct
-        if(!isCorrect) {
-            const all = document.querySelectorAll('.opt-btn');
-            all[correctIdx].classList.add('correct');
+        if(isCorrect) {
+            btn.classList.add('correct');
+        } else {
+            btn.classList.add('wrong');
+            // Highlight correct graph
+            const correctBtn = document.querySelector(`button[data-idx="${correctIdx}"]`);
+            if(correctBtn) correctBtn.classList.add('correct');
         }
-
-        const q = questionPool[this.idx];
-        // Für den Bericht wandeln wir den Index in Text um
-        const userText = "Graph " + (selectedIdx+1);
-        const corText = "Graph " + (correctIdx+1);
+        
+        const userText = "Gewählter Graph";
+        const corText = "Der richtige Graph (grün)";
         this.resolve(isCorrect, userText, corText);
     },
 
+    giveUp: function() {
+        this.disableBtns();
+        const inp = document.getElementById('usrInp');
+        if(inp) inp.disabled = true;
+
+        const data = questionPool[this.idx];
+        let correctDisplay = "";
+        
+        // Show correct answer visually if possible
+        if(data.t === 'mc') {
+             const all = document.querySelectorAll('.opt-btn');
+             all.forEach(b => {
+                if(b.dataset.val === data.correct) b.classList.add('correct');
+            });
+            correctDisplay = data.correct;
+        }
+        else if(data.t === 'graph_mc') {
+            const correctBtn = document.querySelector(`button[data-idx="${data.correct}"]`);
+            if(correctBtn) correctBtn.classList.add('correct');
+            correctDisplay = "Der grün markierte Graph";
+        }
+        else {
+            correctDisplay = data.ans;
+        }
+
+        this.resolve(false, "Weiß ich nicht", correctDisplay);
+    },
+
     disableBtns: function() {
-        const btns = document.querySelectorAll('.opt-btn');
+        const btns = document.querySelectorAll('.opt-btn, .check-btn, .skip-btn');
         btns.forEach(b => b.style.pointerEvents = 'none');
     },
 
@@ -576,7 +624,6 @@ const Engine = {
         const data = questionPool[this.idx];
         const fb = document.getElementById('feedbackBox');
         
-        // Save to History
         this.history.push({
             q: data.q,
             u: userVal,
@@ -594,7 +641,13 @@ const Engine = {
         } else {
             fb.classList.add('wrong');
             document.getElementById('fbTitle').innerText = "Leider falsch.";
-            document.getElementById('fbText').innerHTML = `Lösung: <strong>${Utils.fmt(String(correctVal))}</strong><br><br>${Utils.fmt(data.expl)}`;
+            let solText = "";
+            // Bei Graphen haben wir jetzt die grüne Umrandung, daher brauchen wir den Text nicht unbedingt,
+            // aber bei Textaufgaben ist er hilfreich.
+            if(data.t !== 'graph_mc') {
+                solText = `Lösung: <strong>${Utils.fmt(String(correctVal))}</strong><br><br>`;
+            }
+            document.getElementById('fbText').innerHTML = solText + Utils.fmt(data.expl);
         }
     },
 
@@ -610,7 +663,6 @@ const Engine = {
         
         document.getElementById('finalScore').innerText = this.score;
 
-        // Generate Report
         const wrongs = this.history.filter(h => !h.ok);
         const rList = document.getElementById('reportList');
         
@@ -624,7 +676,7 @@ const Engine = {
                 div.innerHTML = `
                     <div class="report-q">${Utils.fmt(item.q)}</div>
                     <div class="report-ans">Deine Antwort: ${item.u}</div>
-                    <div class="report-sol">Richtig: ${item.c}</div>
+                    <div class="report-sol">Richtig: ${Utils.fmt(String(item.c))}</div>
                     <div style="margin-top:5px; font-style:italic; font-size:0.85rem">${Utils.fmt(item.expl)}</div>
                 `;
                 rList.appendChild(div);
@@ -633,7 +685,6 @@ const Engine = {
     }
 };
 
-// Start
 Engine.init();
 
 </script>
