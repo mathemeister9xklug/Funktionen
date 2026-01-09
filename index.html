@@ -3,690 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mathe Trainer: Funktionen</title>
+    <title>Exponentialfunktionen Quiz</title>
+    
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --success: #16a34a;
-            --error: #dc2626;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
-            --border: #e2e8f0;
-            --gray-btn: #94a3b8;
-            --gray-btn-hover: #64748b;
-        }
-
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 700px;
-            background: var(--card);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
         }
 
-        /* --- Header & Stats --- */
-        header { text-align: center; margin-bottom: 20px; }
-        h2 { margin: 0 0 5px 0; color: var(--primary-dark); }
-        
-        .progress-bar {
-            height: 8px;
-            background: var(--border);
-            border-radius: 4px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.3s;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: #64748b;
-            font-weight: 600;
+        header {
+            text-align: center;
+            margin-bottom: 30px;
         }
 
-        /* --- Question Area --- */
-        .question-box {
-            font-size: 1.2rem;
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
             margin-bottom: 20px;
+        }
+
+        #graph-container {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option-btn {
+            background-color: #fff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .option-btn:hover {
+            background-color: #e7f1ff;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .option-btn.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        /* Feedback Bereich angepasst für Listen */
+        #feedback-area {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 5px solid transparent;
+            display: none; /* Standardmäßig ausblenden */
+        }
+        
+        #feedback-area.visible {
+            display: block;
+            border-left-color: #007bff;
+        }
+
+        .feedback-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .explanation-list {
+            text-align: left;
+            margin: 0;
+            padding-left: 20px;
+            color: #444;
+        }
+
+        .explanation-list li {
+            margin-bottom: 5px;
             line-height: 1.5;
         }
 
-        /* Math Formatting */
-        .math { font-family: "Times New Roman", serif; font-style: italic; }
-        .num { font-family: inherit; font-style: normal; }
-        sup { line-height: 0; font-size: 0.8em; }
-
-        /* Visuals (SVG) */
-        .visual-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            background: #fff;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        svg { max-width: 100%; height: auto; }
-        .grid-line { stroke: #e2e8f0; stroke-width: 1; }
-        .axis-line { stroke: #334155; stroke-width: 2; }
-        .graph-line { stroke-width: 3; fill: none; stroke-linecap: round; }
-        .axis-text { font-size: 10px; fill: #64748b; font-family: sans-serif; }
-
-        /* --- Inputs --- */
-        .options-grid {
-            display: grid;
-            gap: 10px;
-            grid-template-columns: 1fr;
-        }
-        @media(min-width: 500px) { .options-grid.grid-2 { grid-template-columns: 1fr 1fr; } }
-
-        button.opt-btn {
-            background: #fff;
-            border: 2px solid var(--border);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1rem;
-            text-align: left;
-            cursor: pointer;
-            color: var(--text);
-            transition: all 0.2s;
-            position: relative; /* For overlays if needed */
-        }
-        button.opt-btn:hover { border-color: var(--primary); background: #f0f9ff; }
-        
-        button.opt-btn.correct { background: #dcfce7; border-color: var(--success); color: #14532d; border-width: 3px; }
-        button.opt-btn.wrong { background: #fee2e2; border-color: var(--error); color: #7f1d1d; opacity: 0.7; }
-
-        input.txt-input {
-            width: 100%;
-            padding: 12px;
-            font-size: 1.1rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        input.txt-input:focus { border-color: var(--primary); }
-        input.txt-input:disabled { background: #f1f5f9; color: #94a3b8; }
-
-        .check-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px;
-            width: 100%;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
-        /* --- Skip Button (Gray) --- */
-        .skip-btn {
-            background: var(--gray-btn);
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            margin-top: 15px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .skip-btn:hover { background: var(--gray-btn-hover); }
-
-        /* --- Feedback & Hints --- */
-        details {
-            margin-top: 20px;
-            background: #f1f5f9;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-        summary { color: var(--primary); font-weight: 600; cursor: pointer; }
-
-        .feedback {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
+        #next-btn {
             display: none;
-        }
-        .feedback.show { display: block; animation: fadeIn 0.3s; }
-        .feedback.correct { background: #f0fdf4; border: 1px solid #bbf7d0; }
-        .feedback.wrong { background: #fef2f2; border: 1px solid #fecaca; }
-
-        .next-btn {
-            margin-top: 10px;
-            background: #334155;
+            margin: 20px auto;
+            padding: 10px 30px;
+            background-color: #28a745;
             color: white;
             border: none;
-            padding: 12px;
-            width: 100%;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 5px;
+            font-size: 1.2em;
             cursor: pointer;
         }
-
-        /* --- Report --- */
-        .report-card {
-            border: 1px solid var(--error);
-            background: #fff;
+        
+        #progress {
+            text-align: right;
+            color: #666;
             margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            border-left: 5px solid var(--error);
         }
-        .report-q { font-weight: bold; margin-bottom: 5px; }
-        .report-ans { font-size: 0.9rem; color: #dc2626; }
-        .report-sol { font-size: 0.9rem; color: #16a34a; font-weight: bold; }
 
-        .hidden { display: none !important; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(5px);} to{opacity:1;transform:translateY(0);} }
-
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header id="headerSection">
-        <h2>Mathe Trainer</h2>
-        <div class="stats">
-            <span id="qCounter">Frage 1 / 70</span>
-            <span id="scoreCounter">Punkte: 0</span>
-        </div>
-        <div class="progress-bar"><div id="pBar" class="progress-fill"></div></div>
-    </header>
+<header>
+    <h1>Exponentialfunktionen Quiz</h1>
+    <p>Welche Funktionsgleichung gehört zum Graphen?</p>
+</header>
 
-    <main id="gameSection">
-        <div id="questionText" class="question-box"></div>
-        
-        <div id="visualArea" class="visual-container hidden"></div>
-
-        <div id="interactionArea"></div>
-
-        <details id="hintBox">
-            <summary>Hinweis anzeigen</summary>
-            <p id="hintText" style="margin-top:5px; font-size:0.95rem;"></p>
-        </details>
-
-        <div id="feedbackBox" class="feedback">
-            <h3 id="fbTitle" style="margin:0 0 10px 0;"></h3>
-            <div id="fbText"></div>
-            <button class="next-btn" onclick="Engine.next()">Nächste Frage</button>
-        </div>
-    </main>
-
-    <div id="endSection" class="hidden">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="font-size:3rem; margin:0;">🏁</h1>
-            <h3>Training beendet!</h3>
-            <p>Du hast <strong id="finalScore"></strong> von 70 Punkten.</p>
-        </div>
-
-        <div id="errorReportArea" class="hidden">
-            <h4 style="border-bottom: 2px solid #e2e8f0; padding-bottom:10px;">Deine Fehlerübersicht:</h4>
-            <div id="reportList"></div>
-        </div>
-        <div id="perfectScoreMsg" class="hidden" style="text-align:center; color:green;">
-            <h3>Perfekt! Keine Fehler.</h3>
-        </div>
-
-        <button class="check-btn" onclick="location.reload()" style="margin-top:20px;">Neustart</button>
+<div id="quiz-container">
+    <div id="progress">Aufgabe <span id="current-q">1</span> von 10</div>
+    
+    <div class="card">
+        <div id="graph-container"></div>
     </div>
+
+    <div id="feedback-area"></div>
+
+    <div class="options-grid" id="options-container">
+        </div>
+
+    <button id="next-btn" onclick="nextQuestion()">Nächste Aufgabe</button>
+</div>
+
+<div id="end-screen" class="card hidden" style="text-align: center;">
+    <h2>Quiz beendet!</h2>
+    <p>Du hast <span id="final-score"></span> von 10 Aufgaben richtig gelöst.</p>
+    <button class="option-btn" onclick="location.reload()" style="margin: 20px auto; width: auto; padding: 10px 30px;">Neustart</button>
 </div>
 
 <script>
-
-/* --- 1. HELPER: MATH FORMATTER & SVG --- */
-const Utils = {
-    fmt: function(str) {
-        if(!str) return "";
-        return str
-            .replace(/\^2/g, '<sup>2</sup>')
-            .replace(/\*/g, '·')
-            .replace(/\b(x|y|f|g|a|c|d|e|m|n)\b/g, '<span class="math">$1</span>');
-    },
-    
-    shuffle: function(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+    // --- Konfiguration der 10 Level mit detaillierten Erklärungen ---
+    const levels = [
+        { 
+            a: 1, b: 2, c: 1, d: 0, 
+            explanation: `
+                <li><b>d = 0:</b> Die Asymptote ist die x-Achse.</li>
+                <li><b>b = 2:</b> Die Basis ist > 1, daher exponentielles Wachstum.</li>
+                <li><b>a = 1:</b> Der Graph geht durch (0|1) und ist nicht gestreckt.</li>`
+        },
+        { 
+            a: 1, b: 0.5, c: 1, d: 0, 
+            explanation: `
+                <li><b>b = 0,5:</b> Die Basis liegt zwischen 0 und 1. Das bedeutet Zerfall (der Graph fällt).</li>
+                <li><b>d = 0:</b> Die Asymptote ist die x-Achse.</li>`
+        },
+        { 
+            a: 1, b: 2, c: 1, d: 3, 
+            explanation: `
+                <li><b>d = 3:</b> Der gesamte Graph ist um 3 nach oben verschoben. Die Asymptote liegt bei y = 3.</li>
+                <li><b>b = 2:</b> Der Graph wächst nach oben weg.</li>`
+        },
+        { 
+            a: -1, b: 2, c: 1, d: 0, 
+            explanation: `
+                <li><b>a = -1:</b> Das Vorzeichen ist negativ. Der Graph ist an der x-Achse gespiegelt und verläuft nach unten.</li>
+                <li><b>b = 2:</b> Die Basis sorgt für Wachstum (in den negativen Bereich).</li>`
+        },
+        { 
+            a: 1, b: 3, c: -1, d: 0, 
+            explanation: `
+                <li><b>c = -1:</b> Das Minus im Exponenten spiegelt den Graphen an der y-Achse. Aus Wachstum wird Zerfall.</li>
+                <li><b>b = 3:</b> Die Kurve ist steiler als bei Basis 2.</li>`
+        },
+        { 
+            a: 2, b: 1.5, c: 1, d: -2, 
+            explanation: `
+                <li><b>d = -2:</b> Die Asymptote ist um 2 nach unten verschoben (y = -2).</li>
+                <li><b>a = 2:</b> Streckung! Der Schnittpunkt mit der y-Achse liegt nicht 1 Einheit, sondern 2 Einheiten über der Asymptote (bei y = 0).</li>`
+        },
+        { 
+            a: -2, b: 2, c: 1, d: 4, 
+            explanation: `
+                <li><b>d = 4:</b> Die Asymptote liegt oben bei y = 4.</li>
+                <li><b>a = -2:</b> Spiegelung und Streckung. Der Graph verläuft unterhalb der Asymptote und startet bei y = 2 (4 - 2).</li>`
+        },
+        { 
+            a: 0.5, b: 4, c: 1, d: 1, 
+            explanation: `
+                <li><b>d = 1:</b> Die Asymptote liegt bei y = 1.</li>
+                <li><b>a = 0,5:</b> Stauchung. Der Graph startet sehr flach, nur 0,5 Einheiten über der Asymptote.</li>
+                <li><b>b = 4:</b> Sehr steiles Wachstum danach.</li>`
+        },
+        { 
+            a: 1, b: 2, c: -1, d: -4, 
+            explanation: `
+                <li><b>d = -4:</b> Die Asymptote liegt tief unten bei y = -4.</li>
+                <li><b>c = -1:</b> Durch das Minus im Exponenten fällt der Graph von links oben kommend zur Asymptote hin ab.</li>`
+        },
+        { 
+            a: -1, b: 0.5, c: 1, d: 2, 
+            explanation: `
+                <li><b>d = 2:</b> Asymptote bei y = 2.</li>
+                <li><b>b = 0,5:</b> Eigentlich Zerfall, aber...</li>
+                <li><b>a = -1:</b> ...durch die Spiegelung steigt der Graph von unten kommend gegen die Asymptote.</li>`
         }
-        return array;
-    },
-    
-    drawSVG: function(type, p) {
-        const size = 280, range = 6;
-        const scale = size / (range * 2);
-        const center = size / 2;
-        const toX = x => center + x * scale;
-        const toY = y => center - y * scale;
+    ];
 
-        let svg = `<svg viewBox="0 0 ${size} ${size}">`;
+    let currentLevelIndex = 0;
+    let score = 0;
+    let canClick = true;
+
+    // Hilfsfunktion: Latex String generieren
+    function generateLatex(p) {
+        let str = "y = ";
+        if (p.a === -1) str += "-";
+        else if (p.a !== 1) str += p.a + " \\cdot ";
         
-        // Grid
-        for(let i=-range; i<=range; i++) {
-            if(i===0) continue;
-            let pos = toX(i);
-            svg += `<line x1="${pos}" y1="0" x2="${pos}" y2="${size}" class="grid-line"/>`;
-            svg += `<line x1="0" y1="${pos}" x2="${size}" y2="${pos}" class="grid-line"/>`;
-            if(Math.abs(i) !== range) {
-                svg += `<text x="${pos}" y="${center+12}" text-anchor="middle" class="axis-text">${i}</text>`;
-                svg += `<text x="${center-4}" y="${toY(i)+3}" text-anchor="end" class="axis-text">${i}</text>`;
-            }
-        }
-        // Axes
-        svg += `<line x1="0" y1="${center}" x2="${size}" y2="${center}" class="axis-line"/>`;
-        svg += `<line x1="${center}" y1="0" x2="${center}" y2="${size}" class="axis-line"/>`;
-        svg += `<text x="${size-10}" y="${center-6}" class="axis-text" style="font-weight:bold">x</text>`;
-        svg += `<text x="${center+6}" y="10" class="axis-text" style="font-weight:bold">y</text>`;
-
-        // Function Path
-        let path = "";
-        if(type === 'linear') {
-            let y1 = p.m * (-range) + p.n;
-            let y2 = p.m * (range) + p.n;
-            path = `<line x1="${toX(-range)}" y1="${toY(y1)}" x2="${toX(range)}" y2="${toY(y2)}" stroke="#2563eb" class="graph-line"/>`;
-        } else if (type === 'quadratic') {
-            let dString = "M ";
-            for(let x=-range; x<=range; x+=0.1) {
-                let y = p.a * Math.pow((x - p.d), 2) + p.e;
-                if(y > range+1 || y < -range-1) continue;
-                dString += `${toX(x)} ${toY(y)} `;
-                if(dString.length < 5) dString = "L ";
-            }
-            path = `<path d="${dString}" stroke="#dc2626" class="graph-line" fill="none"/>`;
-        }
-        svg += path + "</svg>";
-        return svg;
+        str += p.b;
+        str += "^{";
+        if (p.c === -1) str += "-x";
+        else if (p.c !== 1) str += p.c + "x";
+        else str += "x";
+        str += "}";
+        
+        if (p.d > 0) str += " + " + p.d;
+        else if (p.d < 0) str += " - " + Math.abs(p.d);
+        
+        return "$$" + str + "$$";
     }
-};
 
-/* --- 2. QUESTION DATA POOL --- */
-const rawQuestions = [
-    // --- LINEARE FUNKTIONEN ---
-    { t: "input", q: "Berechne y für x = 2 bei f(x) = 3x + 1", ans: 7, h: "Setze 2 für x ein.", expl: "f(2) = 3·2 + 1 = 7" },
-    { t: "input", q: "Berechne y für x = -1 bei f(x) = 2x - 3", ans: -5, h: "Setze -1 für x ein.", expl: "f(-1) = 2·(-1) - 3 = -2 - 3 = -5" },
-    { t: "input", q: "Berechne y für x = 0 bei f(x) = -x + 5", ans: 5, h: "Setze 0 ein.", expl: "f(0) = 0 + 5 = 5" },
-    { t: "input", q: "Gegeben f(x) = 2x + 4. Für welches x ist y = 10?", ans: 3, h: "Setze die Gleichung gleich 10: 10 = 2x + 4", expl: "10 = 2x + 4 | -4 -> 6 = 2x -> x = 3" },
-    { t: "input", q: "Gegeben f(x) = -2x. Für welches x ist y = 8?", ans: -4, h: "8 = -2x", expl: "8 = -2x | :(-2) -> x = -4" },
-    { t: "input", q: "Liegt der Punkt P(2|5) auf f(x) = x + 3? (1 für Ja, 0 für Nein)", ans: 1, h: "Prüfe ob 2+3 gleich 5 ist.", expl: "Ja, 2+3 = 5." },
+    // Hilfsfunktion: Zufällige falsche Parameter erzeugen
+    function generateDistractors(correct) {
+        let options = [];
+        options.push({ ...correct, correct: true }); 
 
-    { t: "graph_mc", q: "Welcher Graph zeigt f(x) = x + 1?", correct: 0, 
-      opts: [{m:1,n:1}, {m:-1,n:1}, {m:1,n:-1}, {m:2,n:1}], 
-      h: "Startet bei y=1, steigt um 1.", expl: "y-Achsenabschnitt +1, Steigung positiv." },
-      
-    { t: "graph_mc", q: "Welcher Graph zeigt f(x) = -2x + 2?", correct: 0, 
-      opts: [{m:-2,n:2}, {m:2,n:2}, {m:-2,n:-2}, {m:-0.5,n:2}], 
-      h: "Startet bei y=2, fällt steil.", expl: "Fällt um 2 Einheiten pro Schritt." },
+        const variations = [
+            p => ({ ...p, a: -p.a }), // Vorzeichenfehler a
+            p => ({ ...p, d: -p.d }), // Vorzeichenfehler d
+            p => ({ ...p, b: p.b === 2 ? 0.5 : (p.b === 0.5 ? 2 : (p.b + 1)) }), 
+            p => ({ ...p, c: -p.c }), 
+            p => ({ ...p, a: p.d !== 0 ? p.d : p.a + 1, d: p.a }), 
+            p => ({ ...p, d: p.d + 2 }), 
+            p => ({ ...p, a: p.a * 2 }) 
+        ];
 
-    { t: "graph_mc", q: "Welcher Graph zeigt f(x) = 0,5x - 2?", correct: 0, 
-      opts: [{m:0.5,n:-2}, {m:2,n:-2}, {m:-0.5,n:-2}, {m:0.5,n:2}], 
-      h: "Schneidet y-Achse bei -2, steigt flach.", expl: "n=-2, m=0,5 (flacher Anstieg)." },
+        let usedLatex = new Set();
+        usedLatex.add(generateLatex(correct));
 
-    { t: "mc", q: "Was gibt m in f(x)=mx+n an?", correct: "Die Steigung", opts: ["Die Steigung", "Den y-Achsenabschnitt", "Die Nullstelle"], h: "Wie steil der Berg ist.", expl: "m ist die Steigung." },
-    { t: "mc", q: "Was gibt n in f(x)=mx+n an?", correct: "Schnittpunkt mit y-Achse", opts: ["Schnittpunkt mit y-Achse", "Schnittpunkt mit x-Achse", "Steigung"], h: "Wo die Gerade startet (auf der senkrechten Linie).", expl: "n ist der y-Achsenabschnitt." },
-    { t: "mc", q: "Die Gerade f(x) = -3x + 5 ...", correct: "fällt.", opts: ["fällt.", "steigt.", "ist waagerecht."], h: "Schau auf das Vorzeichen von m.", expl: "m = -3 ist negativ, also fällt sie." },
-    { t: "mc", q: "Die Gerade f(x) = 4 ...", correct: "ist parallel zur x-Achse.", opts: ["ist parallel zur x-Achse.", "steigt steil an.", "geht durch den Ursprung."], h: "Hier ist m = 0.", expl: "Kein x bedeutet m=0, also waagerecht." },
+        let count = 0;
+        let attempt = 0;
+        while (count < 5 && attempt < 50) {
+            let func = variations[attempt % variations.length];
+            let fake = func(correct);
+            let latex = generateLatex(fake);
+            if (!usedLatex.has(latex)) {
+                options.push({ ...fake, correct: false });
+                usedLatex.add(latex);
+                count++;
+            }
+            attempt++;
+        }
+        return options.sort(() => Math.random() - 0.5);
+    }
 
-    { t: "mc", q: "Welche Funktion ist parallel zu f(x) = 2x + 5?", correct: "g(x) = 2x - 3", opts: ["g(x) = 2x - 3", "g(x) = -2x + 5", "g(x) = 0,5x + 5"], h: "Parallele Geraden haben das gleiche m.", expl: "Beide haben m=2." },
-    { t: "mc", q: "Sind f(x)=3x+1 und g(x)=3x+2 parallel?", correct: "Ja", opts: ["Ja", "Nein"], h: "Vergleiche m.", expl: "Ja, m=3 bei beiden." },
-    { t: "mc", q: "Welche Steigung muss eine Gerade haben, die parallel zu y = -x + 4 ist?", correct: "-1", opts: ["-1", "1", "0"], h: "Was steht vor dem x?", expl: "Steigung ist -1." },
+    function plotGraph(p) {
+        let xValues = [];
+        let yValues = [];
+        let asymptote = [];
+        let step = 0.1;
+        for (let x = -6; x <= 6; x += step) {
+            xValues.push(x);
+            let y = p.a * Math.pow(p.b, p.c * x) + p.d;
+            yValues.push(y);
+            asymptote.push(p.d);
+        }
 
-    { t: "input", q: "Nullstelle von f(x) = x - 3", ans: 3, h: "0 = x - 3", expl: "3 = x" },
-    { t: "input", q: "Nullstelle von f(x) = 2x - 4", ans: 2, h: "0 = 2x - 4", expl: "4 = 2x -> x = 2" },
-    { t: "input", q: "Nullstelle von f(x) = -3x + 9", ans: 3, h: "0 = -3x + 9", expl: "-9 = -3x -> x = 3" },
-    { t: "input", q: "Nullstelle von f(x) = 4x + 8", ans: -2, h: "0 = 4x + 8", expl: "-8 = 4x -> x = -2" },
-    { t: "input", q: "Nullstelle von f(x) = -x - 5", ans: -5, h: "0 = -x - 5", expl: "x = -5" },
+        let layout = {
+            margin: { t: 20, r: 20, b: 40, l: 40 },
+            xaxis: { title: 'x', zeroline: true, zerolinewidth: 3, gridcolor: '#eee', dtick: 1 },
+            yaxis: { 
+                title: 'y', zeroline: true, zerolinewidth: 3, gridcolor: '#eee',
+                range: [Math.min(-5, p.d - 5), Math.max(10, p.d + 10)]
+            },
+            showlegend: false,
+            hovermode: false 
+        };
 
-    { t: "input", q: "P(x|6) liegt auf y = 2x. Berechne x.", ans: 3, h: "6 = 2x", expl: "x = 3" },
-    { t: "input", q: "P(2|y) liegt auf y = -3x + 1. Berechne y.", ans: -5, h: "y = -3(2) + 1", expl: "-6 + 1 = -5" },
-    { t: "input", q: "P(4|y) liegt auf y = 0,5x. Berechne y.", ans: 2, h: "y = 0,5 mal 4", expl: "2" },
-    { t: "input", q: "Ursprungsgerade mit Steigung 3 geht durch P(2|?).", ans: 6, h: "y = 3x", expl: "y = 3·2 = 6" },
-    
-    { t: "input", q: "Schnittpunkt (x-Wert) von y=x und y=-x+2", ans: 1, h: "x = -x + 2", expl: "2x = 2 -> x = 1" },
-    { t: "input", q: "Schnittpunkt (x-Wert) von y=2x und y=x+3", ans: 3, h: "2x = x + 3", expl: "2x - x = 3 -> x = 3" },
-    { t: "input", q: "Schnittpunkt (x-Wert) von y=x+1 und y=2x-1", ans: 2, h: "x+1 = 2x-1", expl: "1+1 = 2x-x -> 2 = x" },
-    { t: "mc", q: "Schneiden sich y=2x+1 und y=2x-3?", correct: "Nein", opts: ["Nein", "Ja"], h: "Sind sie parallel?", expl: "Nein, sie sind parallel (m=2)." },
-    { t: "mc", q: "Wo schneiden sich y=3 und x=2?", correct: "P(2|3)", opts: ["P(2|3)", "P(3|2)", "Gar nicht"], h: "Zeichne es im Kopf.", expl: "Eine Waagerechte und eine Senkrechte schneiden sich bei (2|3)." },
-    
-    { t: "input", q: "Steigung der Geraden durch P(0|0) und Q(2|4)?", ans: 2, h: "m = (y2-y1)/(x2-x1)", expl: "4/2 = 2" },
-    { t: "input", q: "Steigung der Geraden durch P(1|1) und Q(3|5)?", ans: 2, h: "Höhenunterschied durch Längenunterschied", expl: "(5-1)/(3-1) = 4/2 = 2" },
-    { t: "input", q: "y-Achsenabschnitt von y = 3x - 7?", ans: -7, h: "Die Zahl ohne x.", expl: "n = -7" },
-    { t: "mc", q: "Verläuft y = x + 1 durch den Ursprung?", correct: "Nein", opts: ["Ja", "Nein"], h: "Ursprung ist (0|0)", expl: "Nein, bei x=0 ist y=1." },
+        let trace1 = { x: xValues, y: yValues, mode: 'lines', line: { color: '#007bff', width: 3 } };
+        let trace2 = { x: xValues, y: asymptote, mode: 'lines', line: { color: '#ff0000', width: 1, dash: 'dash' } };
 
-    // --- QUADRATISCHE FUNKTIONEN ---
-    { t: "mc", q: "Welche Parabel ist nach unten geöffnet?", correct: "y = -2x^2", opts: ["y = -2x^2", "y = 2x^2", "y = x^2"], h: "Suche das Minus.", expl: "Negatives a." },
-    { t: "mc", q: "Welche Parabel ist breiter (gestaucht)?", correct: "y = 0,5x^2", opts: ["y = 0,5x^2", "y = 2x^2", "y = 10x^2"], h: "Zahl kleiner als 1.", expl: "0,5 < 1, also breiter." },
-    { t: "mc", q: "Welche Parabel ist schmaler (gestreckt)?", correct: "y = 4x^2", opts: ["y = 4x^2", "y = x^2", "y = 0,1x^2"], h: "Große Zahl vor x^2.", expl: "4 > 1." },
-    { t: "mc", q: "Normalparabel bedeutet a = ...?", correct: "1", opts: ["1", "0", "2"], h: "Standardform.", expl: "a = 1." },
-    { t: "input", q: "Berechne y für x=2 bei y=3x^2", ans: 12, h: "Erst quadrieren: 2^2", expl: "3 · 4 = 12" },
+        Plotly.newPlot('graph-container', [trace1, trace2], layout, {staticPlot: false, displayModeBar: false});
+    }
 
-    { t: "mc", q: "Wohin ist y = x^2 + 3 verschoben?", correct: "Oben", opts: ["Oben", "Unten", "Rechts", "Links"], h: "Plus am Ende.", expl: "Nach oben." },
-    { t: "mc", q: "Wohin ist y = x^2 - 2 verschoben?", correct: "Unten", opts: ["Unten", "Oben", "Rechts"], h: "Minus am Ende.", expl: "Nach unten." },
-    { t: "input", q: "Scheitelpunkt-y-Wert von y = 2x^2 + 5?", ans: 5, h: "Der tiefste Punkt.", expl: "S(0|5)." },
-    
-    { t: "mc", q: "Scheitelpunkt von y = (x-2)^2 + 1?", correct: "S(2|1)", opts: ["S(2|1)", "S(-2|1)", "S(2|-1)"], h: "Vorzeichen in Klammer drehen.", expl: "x-Verschiebung umgekehrt: +2." },
-    { t: "mc", q: "Scheitelpunkt von y = (x+3)^2?", correct: "S(-3|0)", opts: ["S(-3|0)", "S(3|0)", "S(0|3)"], h: "Klammer +3 bedeutet nach links.", expl: "S(-3|0)." },
-    { t: "mc", q: "Gleichung für S(4|2) (Normalparabel)?", correct: "y=(x-4)^2+2", opts: ["y=(x-4)^2+2", "y=(x+4)^2+2"], h: "x-4 in die Klammer.", expl: "(x-d)^2+e." },
-    { t: "graph_mc", q: "Welcher Graph zeigt y = (x-2)^2 - 1?", correct: 0,
-      opts: [{a:1,d:2,e:-1}, {a:1,d:-2,e:-1}, {a:-1,d:2,e:-1}, {a:1,d:2,e:1}],
-      h: "Suche S(2|-1).", expl: "Nach rechts verschoben und eins runter." },
-      
-    { t: "graph_mc", q: "Welcher Graph zeigt y = -(x+1)^2 + 2?", correct: 0,
-      opts: [{a:-1,d:-1,e:2}, {a:1,d:-1,e:2}, {a:-1,d:1,e:2}, {a:-1,d:-1,e:-2}],
-      h: "Nach unten offen, S(-1|2).", expl: "Minus davor = unten offen. x+1 = links." },
-
-    { t: "input", q: "y = ax^2 geht durch P(1|3). Berechne a.", ans: 3, h: "Setze ein: 3 = a·1^2", expl: "a = 3" },
-    { t: "input", q: "y = ax^2 geht durch P(2|2). Berechne a (als Dezimalzahl).", ans: 0.5, h: "2 = a·4", expl: "a = 2/4 = 0,5" },
-    { t: "input", q: "y = x^2 + c geht durch P(0|-4). Berechne c.", ans: -4, h: "c ist der y-Achsenabschnitt.", expl: "c = -4" },
-    { t: "input", q: "y = a(x-1)^2 + 2 hat Scheitel bei x=...?", ans: 1, h: "Lies d ab.", expl: "x = 1" },
-
-    { t: "mc", q: "Löse auf: (x+2)^2", correct: "x^2 + 4x + 4", opts: ["x^2 + 4x + 4", "x^2 + 4", "x^2 + 2x + 4"], h: "a^2 + 2ab + b^2", expl: "x^2 + 2·x·2 + 2^2" },
-    { t: "mc", q: "Löse auf: (x-3)^2", correct: "x^2 - 6x + 9", opts: ["x^2 - 6x + 9", "x^2 - 9", "x^2 + 6x - 9"], h: "Achtung Minus in der Mitte.", expl: "x^2 - 6x + 9" },
-    { t: "input", q: "Konstantes Glied beim Auflösen von (x+5)^2?", ans: 25, h: "5 zum Quadrat.", expl: "25" },
-    { t: "input", q: "Faktor vor x beim Auflösen von (x-4)^2?", ans: -8, h: "2 mal -4.", expl: "-8" },
-
-    { t: "input", q: "y = x^2 - 4. Berechne y für x=3.", ans: 5, h: "9 - 4", expl: "5" },
-    { t: "input", q: "y = 2(x-1)^2. Berechne y für x=3.", ans: 8, h: "Klammer zuerst: (3-1)^2", expl: "2 · 2^2 = 2·4 = 8" },
-    { t: "input", q: "Nullstelle (positiv) von y = x^2 - 9", ans: 3, h: "x^2 = 9", expl: "Wurzel aus 9 ist 3." },
-    { t: "input", q: "Nullstelle (negativ) von y = x^2 - 16", ans: -4, h: "x^2 = 16", expl: "-4" },
-    
-    { t: "mc", q: "y = -0,5(x-2)^2 + 3. Ist die Parabel gestreckt oder gestaucht?", correct: "gestaucht", opts: ["gestaucht", "gestreckt"], h: "0,5 < 1", expl: "Betrag 0,5 ist kleiner 1 -> gestaucht." },
-    { t: "mc", q: "y = -3(x+1)^2 - 5. Öffnung?", correct: "Unten", opts: ["Unten", "Oben"], h: "Vorzeichen von a.", expl: "Minus -> Unten." },
-    { t: "input", q: "y = x^2. Wenn x verdoppelt wird (von 1 auf 2), vervierfacht sich y. (1=Wahr, 0=Falsch)", ans: 1, h: "Rechne nach.", expl: "1^2=1, 2^2=4. Wahr." },
-    { t: "input", q: "Anzahl Nullstellen von y = x^2 + 1", ans: 0, h: "Parabel ist nach oben verschoben.", expl: "Schneidet die x-Achse nie." },
-    { t: "input", q: "Anzahl Nullstellen von y = (x-2)^2", ans: 1, h: "Scheitel liegt auf der x-Achse.", expl: "Berührt nur bei x=2." },
-    { t: "input", q: "Anzahl Nullstellen von y = x^2 - 1", ans: 2, h: "Parabel nach unten verschoben.", expl: "Schneidet zweimal." },
-    
-    { t: "input", q: "Bestimme a: Parabel S(0|0) durch P(3|9).", ans: 1, h: "9 = a · 9", expl: "a = 1" },
-    { t: "mc", q: "y = a(x-d)^2 + e heißt...", correct: "Scheitelpunktform", opts: ["Scheitelpunktform", "Normalform", "Linearform"], h: "Man sieht den Scheitel.", expl: "Scheitelpunktform." },
-    { t: "mc", q: "y = ax^2 + bx + c heißt...", correct: "Allgemeine Form", opts: ["Allgemeine Form", "Scheitelpunktform"], h: "Ausmultipliziert.", expl: "Allgemeine Form." },
-    { t: "input", q: "Was ist 10^2?", ans: 100, h: "Basiswissen.", expl: "100" }
-];
-
-while(rawQuestions.length < 70) {
-    rawQuestions.push({ t: "input", q: "Bonus: Berechne 2^2", ans: 4, h: "", expl: "4" });
-}
-const questionPool = rawQuestions.slice(0, 70);
-
-/* --- 3. ENGINE LOGIC --- */
-
-const Engine = {
-    idx: 0,
-    score: 0,
-    history: [],
-    
-    init: function() {
-        this.idx = 0;
-        this.score = 0;
-        this.history = [];
-        this.render();
-    },
-
-    render: function() {
-        if(this.idx >= questionPool.length) {
-            this.showEnd();
+    function loadQuestion() {
+         if (currentLevelIndex >= levels.length) {
+            showEndScreen();
             return;
         }
 
-        const data = questionPool[this.idx];
-        const qBox = document.getElementById('questionText');
-        const vBox = document.getElementById('visualArea');
-        const iBox = document.getElementById('interactionArea');
-        const hText = document.getElementById('hintText');
-        const hDet = document.getElementById('hintBox');
-        const fbBox = document.getElementById('feedbackBox');
+        document.getElementById('current-q').innerText = currentLevelIndex + 1;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('feedback-area').innerHTML = '';
+        document.getElementById('feedback-area').classList.remove('visible');
+        canClick = true;
 
-        // Reset UI
-        hDet.removeAttribute('open');
-        fbBox.classList.remove('show', 'correct', 'wrong');
-        vBox.classList.add('hidden');
-        iBox.innerHTML = '';
-        
-        // Update Stats
-        document.getElementById('qCounter').innerText = `Frage ${this.idx + 1} / 70`;
-        document.getElementById('scoreCounter').innerText = `Punkte: ${this.score}`;
-        document.getElementById('pBar').style.width = `${(this.idx / 70) * 100}%`;
+        const currentParams = levels[currentLevelIndex];
+        plotGraph(currentParams);
+        const options = generateDistractors(currentParams);
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
 
-        // Content
-        qBox.innerHTML = Utils.fmt(data.q);
-        hText.innerHTML = Utils.fmt(data.h);
-
-        // Inputs
-        if(data.t === 'input') {
-            iBox.innerHTML = `
-                <input type="number" id="usrInp" class="txt-input" placeholder="Zahl eingeben" step="any">
-                <button class="check-btn" onclick="Engine.checkInput()">Prüfen</button>
-            `;
-            document.getElementById('usrInp').addEventListener("keypress", function(event) {
-                if (event.key === "Enter") Engine.checkInput();
-            });
-        } 
-        else if(data.t === 'mc') {
-            const grid = document.createElement('div');
-            grid.className = 'options-grid';
+        options.forEach((opt) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.innerHTML = generateLatex(opt);
+            btn.dataset.isCorrect = opt.correct; 
             
-            const shuffledOpts = Utils.shuffle([...data.opts]);
-            shuffledOpts.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'opt-btn';
-                btn.innerHTML = Utils.fmt(opt);
-                // Mark correct one via data attribute logic for uniformity (text matching here)
-                // For simplified text MC, correct matching by value is enough, 
-                // but highlighting correct logic is added in checkMC
-                btn.dataset.val = opt; 
-                btn.onclick = () => Engine.checkMC(opt, btn);
-                grid.appendChild(btn);
-            });
-            iBox.appendChild(grid);
-        }
-        else if(data.t === 'graph_mc') {
-            const grid = document.createElement('div');
-            grid.className = 'options-grid grid-2';
-            
-            const indices = Array.from(Array(data.opts.length).keys());
-            Utils.shuffle(indices);
-
-            indices.forEach(originalIdx => {
-                const optParams = data.opts[originalIdx];
-                const btn = document.createElement('button');
-                btn.className = 'opt-btn';
-                btn.style.padding = "5px";
-                btn.style.display = "flex";
-                btn.style.justifyContent = "center";
+            btn.onclick = () => {
+                if (!canClick) return;
+                canClick = false;
                 
-                // Add index to find it later
-                btn.dataset.idx = originalIdx;
+                let feedbackHTML = "";
+                
+                if (opt.correct) {
+                    btn.classList.add('correct');
+                    feedbackHTML = '<span class="feedback-title" style="color:green">Richtig! Analyse:</span>';
+                    score++;
+                } else {
+                    btn.classList.add('wrong');
+                    feedbackHTML = '<span class="feedback-title" style="color:red">Falsch. Hier ist die Analyse:</span>';
+                    // Richtige Antwort finden und markieren
+                    const all = document.querySelectorAll('.option-btn');
+                    all.forEach(b => {
+                        if (b.dataset.isCorrect === "true") {
+                            b.classList.add('correct');
+                        }
+                    });
+                }
 
-                let gType = (optParams.m !== undefined) ? 'linear' : 'quadratic';
-                btn.innerHTML = Utils.drawSVG(gType, optParams);
-                btn.onclick = () => Engine.checkGraphMC(originalIdx, btn);
-                grid.appendChild(btn);
-            });
-            iBox.appendChild(grid);
-        }
+                // Strukturierte Erklärung hinzufügen
+                feedbackHTML += `<ul class="explanation-list">${currentParams.explanation}</ul>`;
+                
+                const fbArea = document.getElementById('feedback-area');
+                fbArea.innerHTML = feedbackHTML;
+                fbArea.classList.add('visible');
 
-        // --- SKIP BUTTON ---
-        const skipBtn = document.createElement('button');
-        skipBtn.className = 'skip-btn';
-        skipBtn.innerText = 'Weiß ich nicht';
-        skipBtn.onclick = () => Engine.giveUp();
-        iBox.appendChild(skipBtn);
-    },
-
-    checkInput: function() {
-        const inp = document.getElementById('usrInp');
-        const val = parseFloat(inp.value.replace(',', '.'));
-        const correctVal = questionPool[this.idx].ans;
-        
-        if(isNaN(val)) return;
-
-        const isCorrect = Math.abs(val - correctVal) < 0.1;
-        this.resolve(isCorrect, val, correctVal);
-    },
-
-    checkMC: function(selected, btn) {
-        this.disableBtns();
-        const correctVal = questionPool[this.idx].correct;
-        const isCorrect = (selected === correctVal);
-        
-        if(isCorrect) btn.classList.add('correct');
-        else {
-            btn.classList.add('wrong');
-            // Highlight correct text option
-            const all = document.querySelectorAll('.opt-btn');
-            all.forEach(b => {
-                if(b.dataset.val === correctVal) b.classList.add('correct');
-            });
-        }
-        
-        this.resolve(isCorrect, selected, correctVal);
-    },
-
-    checkGraphMC: function(selectedIdx, btn) {
-        this.disableBtns();
-        const correctIdx = questionPool[this.idx].correct;
-        const isCorrect = (selectedIdx === correctIdx);
-
-        if(isCorrect) {
-            btn.classList.add('correct');
-        } else {
-            btn.classList.add('wrong');
-            // Highlight correct graph
-            const correctBtn = document.querySelector(`button[data-idx="${correctIdx}"]`);
-            if(correctBtn) correctBtn.classList.add('correct');
-        }
-        
-        const userText = "Gewählter Graph";
-        const corText = "Der richtige Graph (grün)";
-        this.resolve(isCorrect, userText, corText);
-    },
-
-    giveUp: function() {
-        this.disableBtns();
-        const inp = document.getElementById('usrInp');
-        if(inp) inp.disabled = true;
-
-        const data = questionPool[this.idx];
-        let correctDisplay = "";
-        
-        // Show correct answer visually if possible
-        if(data.t === 'mc') {
-             const all = document.querySelectorAll('.opt-btn');
-             all.forEach(b => {
-                if(b.dataset.val === data.correct) b.classList.add('correct');
-            });
-            correctDisplay = data.correct;
-        }
-        else if(data.t === 'graph_mc') {
-            const correctBtn = document.querySelector(`button[data-idx="${data.correct}"]`);
-            if(correctBtn) correctBtn.classList.add('correct');
-            correctDisplay = "Der grün markierte Graph";
-        }
-        else {
-            correctDisplay = data.ans;
-        }
-
-        this.resolve(false, "Weiß ich nicht", correctDisplay);
-    },
-
-    disableBtns: function() {
-        const btns = document.querySelectorAll('.opt-btn, .check-btn, .skip-btn');
-        btns.forEach(b => b.style.pointerEvents = 'none');
-    },
-
-    resolve: function(isCorrect, userVal, correctVal) {
-        const data = questionPool[this.idx];
-        const fb = document.getElementById('feedbackBox');
-        
-        this.history.push({
-            q: data.q,
-            u: userVal,
-            c: correctVal,
-            expl: data.expl,
-            ok: isCorrect
+                document.getElementById('next-btn').style.display = 'block';
+            };
+            container.appendChild(btn);
         });
-
-        fb.classList.add('show');
-        if(isCorrect) {
-            this.score++;
-            fb.classList.add('correct');
-            document.getElementById('fbTitle').innerText = "Richtig!";
-            document.getElementById('fbText').innerHTML = Utils.fmt(data.expl);
-        } else {
-            fb.classList.add('wrong');
-            document.getElementById('fbTitle').innerText = "Leider falsch.";
-            let solText = "";
-            // Bei Graphen haben wir jetzt die grüne Umrandung, daher brauchen wir den Text nicht unbedingt,
-            // aber bei Textaufgaben ist er hilfreich.
-            if(data.t !== 'graph_mc') {
-                solText = `Lösung: <strong>${Utils.fmt(String(correctVal))}</strong><br><br>`;
-            }
-            document.getElementById('fbText').innerHTML = solText + Utils.fmt(data.expl);
-        }
-    },
-
-    next: function() {
-        this.idx++;
-        this.render();
-    },
-
-    showEnd: function() {
-        document.getElementById('headerSection').classList.add('hidden');
-        document.getElementById('gameSection').classList.add('hidden');
-        document.getElementById('endSection').classList.remove('hidden');
-        
-        document.getElementById('finalScore').innerText = this.score;
-
-        const wrongs = this.history.filter(h => !h.ok);
-        const rList = document.getElementById('reportList');
-        
-        if(wrongs.length === 0) {
-            document.getElementById('perfectScoreMsg').classList.remove('hidden');
-        } else {
-            document.getElementById('errorReportArea').classList.remove('hidden');
-            wrongs.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'report-card';
-                div.innerHTML = `
-                    <div class="report-q">${Utils.fmt(item.q)}</div>
-                    <div class="report-ans">Deine Antwort: ${item.u}</div>
-                    <div class="report-sol">Richtig: ${Utils.fmt(String(item.c))}</div>
-                    <div style="margin-top:5px; font-style:italic; font-size:0.85rem">${Utils.fmt(item.expl)}</div>
-                `;
-                rList.appendChild(div);
-            });
-        }
+        MathJax.typesetPromise();
     }
-};
 
-Engine.init();
+    function nextQuestion() {
+        currentLevelIndex++;
+        loadQuestion();
+    }
+
+    function showEndScreen() {
+        document.getElementById('quiz-container').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerText = score;
+    }
+
+    // Start
+    loadQuestion();
 
 </script>
+
 </body>
 </html>
