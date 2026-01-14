@@ -39,7 +39,6 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             border-left: 5px solid #3498db;
-            /* Fixierung wurde hier entfernt */
             height: fit-content;
         }
         .guide-step { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
@@ -52,6 +51,7 @@
             padding: 20px; 
             border-radius: 8px; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            min-height: 400px;
         }
         
         canvas { 
@@ -87,9 +87,21 @@
             min-height: 60px;
         }
         button:hover { border-color: #3498db; background: #f7f9fc; }
-        button:disabled { cursor: default; }
-        button.correct { background: #d4edda; border-color: #27ae60; color: #155724; }
-        button.wrong { background: #f8d7da; border-color: #e74c3c; color: #721c24; opacity: 0.6; }
+        button:disabled { cursor: default; pointer-events: none; }
+        
+        /* Styles für Ergebnisse */
+        button.correct { 
+            background: #d4edda !important; 
+            border-color: #27ae60 !important; 
+            color: #155724 !important; 
+            font-weight: bold;
+        }
+        button.wrong { 
+            background: #f8d7da !important; 
+            border-color: #e74c3c !important; 
+            color: #721c24 !important; 
+            opacity: 0.6; 
+        }
 
         .feedback { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; }
         .feedback.success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
@@ -99,9 +111,10 @@
             font-size: 1.2em;
             margin: 10px 0;
             padding: 10px;
-            background: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.6);
             border-radius: 5px;
             text-align: center;
+            border: 1px solid rgba(0,0,0,0.1);
         }
 
         .nav-btn { 
@@ -112,8 +125,32 @@
             width: 100%; 
             padding: 15px;
             font-weight: bold;
+            cursor: pointer;
         }
         .nav-btn:hover { background: #34495e; color: white; }
+
+        /* End Screen Styles */
+        .result-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            margin: 0 auto 20px auto;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+        }
+        .score-text { font-size: 1.2em; margin-bottom: 20px; }
+        .restart-btn { background: #27ae60; border: none; color: white; padding: 15px 30px; font-size: 1.1em; border-radius: 5px; cursor: pointer; }
+        .restart-btn:hover { background: #219150; }
     </style>
 </head>
 <body>
@@ -175,6 +212,7 @@
         ];
 
         let currentProblemIndex = 0;
+        let score = 0; 
 
         // --- Mathe Hilfsfunktionen ---
         function formatVal(val) {
@@ -185,27 +223,21 @@
             return Number(val.toFixed(2));
         }
 
-        // Erzeugt LaTeX String für MathJax
         function generateLatex(a, b, c, d) {
             let str = "f(x) = ";
             
-            // a handling
             if (a === -1) str += "-";
             else if (a !== 1) str += a;
             
             str += "\\cos(";
             
-            // b handling
             if (b !== 1) {
                 if (b === 0.5) str += "0.5";
                 else str += b;
                 str += "\\cdot ";
             }
 
-            // Klammer auf für x-c
             let innerContent = "x";
-            
-            // c handling
             if (c !== 0) {
                 if (c > 0) innerContent += " - " + formatVal(c);
                 else innerContent += " + " + formatVal(Math.abs(c));
@@ -219,7 +251,6 @@
             
             str += ")";
             
-            // d handling
             if (d !== 0) {
                 if (d > 0) str += " + " + d;
                 else str += " - " + Math.abs(d);
@@ -228,47 +259,39 @@
             return `$$${str}$$`;
         }
 
-        // Erzeugt Falsche Antworten
+        // --- Distraktoren ---
         function generateOptions(correct) {
             let opts = [];
             opts.push(correct);
-            
             opts.push({ ...correct, d: correct.d * -1 || 1 }); 
             opts.push({ ...correct, b: correct.b === 1 ? 2 : (correct.b === 2 ? 0.5 : 1) }); 
             opts.push({ ...correct, a: correct.a + 1 }); 
             opts.push({ ...correct, c: correct.c === 0 ? Math.PI/2 : 0 }); 
             opts.push({ ...correct, a: correct.a === 1 ? 2 : 1, d: correct.d + 1 }); 
-
             return opts.sort(() => Math.random() - 0.5);
         }
 
-        // --- Canvas Zeichnen ---
+        // --- Graph Zeichnen ---
         function drawGraph(canvasId, p) {
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
             const w = canvas.width;
             const h = canvas.height;
-            
             const scaleX = 50; 
             const scaleY = 40; 
             const offsetX = 60; 
             const offsetY = h / 2; 
 
             ctx.clearRect(0, 0, w, h);
-
-            // Grid
             ctx.beginPath();
             ctx.strokeStyle = "#f0f0f0";
             ctx.lineWidth = 1;
-            
             for(let y = offsetY; y < h; y+=scaleY) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
             for(let y = offsetY; y > 0; y-=scaleY) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
-            
             const piStep = Math.PI * scaleX / 2; 
             for(let x = offsetX; x < w; x+=piStep) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
             ctx.stroke();
 
-            // Achsen
             ctx.beginPath();
             ctx.strokeStyle = "#333";
             ctx.lineWidth = 2;
@@ -276,24 +299,19 @@
             ctx.moveTo(offsetX, 0); ctx.lineTo(offsetX, h);
             ctx.stroke();
 
-            // Beschriftung
             ctx.font = "14px Arial";
             ctx.fillStyle = "#555";
             ctx.textAlign = "center";
-            
             for(let i = -4; i <= 4; i++) {
                 if(i===0) continue;
                 ctx.fillText(i, offsetX - 20, offsetY - (i * scaleY) + 5);
             }
-            
             ctx.fillText("π", offsetX + Math.PI*scaleX, offsetY + 20);
             ctx.fillText("2π", offsetX + 2*Math.PI*scaleX, offsetY + 20);
 
-            // Kurve
             ctx.beginPath();
             ctx.strokeStyle = "#e74c3c";
             ctx.lineWidth = 3;
-            
             for (let px = 0; px < w; px++) {
                 let x = (px - offsetX) / scaleX;
                 let y = p.a * Math.cos(p.b * (x - p.c)) + p.d;
@@ -309,23 +327,25 @@
             const container = document.getElementById('quiz-container');
             container.innerHTML = ''; 
 
+            if (currentProblemIndex >= problems.length) {
+                showResults(container);
+                return;
+            }
+
             const p = problems[currentProblemIndex];
             const correctLatex = generateLatex(p.a, p.b, p.c, p.d);
             
-            // Header
             const header = document.createElement('h2');
-            header.innerText = `Aufgabe ${currentProblemIndex + 1}`;
+            header.innerText = `Aufgabe ${currentProblemIndex + 1} von ${problems.length}`;
             header.style.marginTop = "0";
             container.appendChild(header);
 
-            // Canvas
             const canvas = document.createElement('canvas');
             canvas.id = 'graphCanvas';
             canvas.width = 600;
             canvas.height = 350; 
             container.appendChild(canvas);
 
-            // Options
             const optionsDiv = document.createElement('div');
             optionsDiv.className = 'options-grid';
             
@@ -336,6 +356,12 @@
                 const latex = generateLatex(opt.a, opt.b, opt.c, opt.d);
                 btn.innerHTML = latex; 
                 
+                // Wir speichern, ob das die richtige Antwort ist direkt im Button
+                const isCorrectOption = (opt.a === p.a && opt.b === p.b && opt.c === p.c && opt.d === p.d);
+                if (isCorrectOption) {
+                    btn.dataset.isCorrect = "true";
+                }
+
                 btn.onclick = () => {
                     const allBtns = optionsDiv.querySelectorAll('button');
                     allBtns.forEach(b => b.disabled = true);
@@ -346,20 +372,25 @@
                     let message = "";
                     let cssClass = "";
 
-                    if (opt.a === p.a && opt.b === p.b && opt.c === p.c && opt.d === p.d) {
-                        btn.className = 'correct';
+                    if (isCorrectOption) {
+                        btn.className = 'correct'; 
+                        score++; 
                         cssClass = 'feedback success';
                         message = `<strong>Richtig!</strong>`;
                     } else {
                         btn.className = 'wrong';
+                        
+                        // Hier ist der Fix: Wir suchen den Button mit dem "isCorrect" Marker
                         allBtns.forEach(b => {
-                            if(b.innerHTML === correctLatex) b.className = 'correct';
+                            if(b.dataset.isCorrect === "true") {
+                                b.className = 'correct';
+                            }
                         });
+                        
                         cssClass = 'feedback error';
                         message = `<strong>Leider falsch.</strong>`;
                     }
 
-                    // Hier fügen wir die Lösung explizit ein
                     feedback.className = cssClass;
                     feedback.innerHTML = `
                         ${message}
@@ -371,45 +402,53 @@
                     `;
 
                     feedback.style.display = 'block';
-                    if(nextBtn) nextBtn.style.display = 'block';
-                    
+                    nextBtn.style.display = 'block'; 
                     MathJax.typesetPromise([feedback]);
                 };
                 optionsDiv.appendChild(btn);
             });
             container.appendChild(optionsDiv);
 
-            // Feedback Area
             const fb = document.createElement('div');
             fb.id = 'feedbackArea';
             fb.className = 'feedback';
             container.appendChild(fb);
 
-            // Next Button
-            if (currentProblemIndex < problems.length - 1) {
-                const nextBtn = document.createElement('button');
-                nextBtn.id = 'nextBtn';
-                nextBtn.className = 'nav-btn';
-                nextBtn.innerText = "Nächste Aufgabe →";
-                nextBtn.style.display = 'none'; 
-                nextBtn.onclick = () => {
-                    currentProblemIndex++;
-                    loadProblem();
-                };
-                container.appendChild(nextBtn);
+            const nextBtn = document.createElement('button');
+            nextBtn.id = 'nextBtn';
+            nextBtn.className = 'nav-btn';
+            
+            if (currentProblemIndex === problems.length - 1) {
+                nextBtn.innerText = "Ergebnis anzeigen →";
             } else {
-                // Ende
-                 const finishMsg = document.createElement('p');
-                 finishMsg.id = 'nextBtn';
-                 finishMsg.style.display = 'none';
-                 finishMsg.style.textAlign = 'center';
-                 finishMsg.style.fontWeight = 'bold';
-                 finishMsg.innerText = "Glückwunsch! Du hast alle Aufgaben geschafft.";
-                 container.appendChild(finishMsg);
+                nextBtn.innerText = "Nächste Aufgabe →";
             }
+            
+            nextBtn.style.display = 'none'; 
+            nextBtn.onclick = () => {
+                currentProblemIndex++;
+                loadProblem();
+            };
+            container.appendChild(nextBtn);
 
             drawGraph('graphCanvas', p);
             MathJax.typesetPromise();
+        }
+
+        function showResults(container) {
+            container.innerHTML = `
+                <div class="result-container">
+                    <h2>Quiz beendet!</h2>
+                    <p class="score-text">Deine Erfolgsquote:</p>
+                    <div class="score-circle">
+                        ${score} / ${problems.length}
+                    </div>
+                    <p>
+                        Du hast <strong>${score}</strong> von <strong>${problems.length}</strong> Aufgaben beim ersten Versuch richtig gelöst.
+                    </p>
+                    <button class="restart-btn" onclick="location.reload()">Nochmal spielen</button>
+                </div>
+            `;
         }
 
         window.onload = loadProblem;
