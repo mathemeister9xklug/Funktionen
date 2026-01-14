@@ -3,409 +3,417 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exponentialfunktionen Quiz</title>
+    <title>Kosinus-Funktions-Master</title>
     
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']]
-            },
-            svg: {
-                fontCache: 'global'
-            }
-        };
-    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #f0f2f5; 
+            color: #333; 
         }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 10px; }
+        .subtitle { text-align: center; margin-bottom: 30px; font-size: 1.1em; }
 
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        #graph-container {
-            width: 100%;
-            height: 400px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .options-grid {
+        /* Layout Container */
+        .layout-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            align-items: start;
         }
 
-        @media (max-width: 600px) {
-            .options-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 800px) {
+            .layout-grid { grid-template-columns: 1fr; }
         }
 
-        .option-btn {
-            background-color: #fff;
-            border: 2px solid #007bff;
+        /* Anleitungskarte */
+        .guide-card {
+            background: #fff;
+            padding: 20px;
             border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: all 0.2s;
-            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+            position: sticky;
+            top: 20px;
+        }
+        .guide-step { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .guide-step:last-child { border-bottom: none; }
+        .guide-title { font-weight: bold; color: #2980b9; display: block; margin-bottom: 5px; }
+
+        /* Aufgabenkarte */
+        .task-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        
+        canvas { 
+            border: 1px solid #ddd; 
+            background-color: #fff; 
+            display: block; 
+            margin: 0 auto 20px auto; 
+            border-radius: 4px; 
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+        }
+
+        .options-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+            margin-top: 20px; 
+        }
+
+        button { 
+            padding: 15px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            border: 2px solid #bdc3c7; 
+            background: white; 
+            color: #2c3e50; 
+            border-radius: 8px; 
+            transition: all 0.2s; 
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 60px;
         }
+        button:hover { border-color: #3498db; background: #f7f9fc; }
+        button:disabled { cursor: default; }
+        button.correct { background: #d4edda; border-color: #27ae60; color: #155724; }
+        button.wrong { background: #f8d7da; border-color: #e74c3c; color: #721c24; opacity: 0.6; }
 
-        .option-btn:hover {
-            background-color: #e7f1ff;
-        }
-
-        .option-btn.correct {
-            background-color: #d4edda;
-            border-color: #28a745;
-            color: #155724;
-        }
-
-        .option-btn.wrong {
-            background-color: #f8d7da;
-            border-color: #dc3545;
-            color: #721c24;
-        }
-
-        /* Feedback Bereich angepasst für Listen */
-        #feedback-area {
-            margin: 15px 0;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 5px solid transparent;
-            display: none; /* Standardmäßig ausblenden */
-        }
+        .feedback { margin-top: 20px; padding: 15px; border-radius: 8px; display: none; }
+        .feedback.success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .feedback.error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
         
-        #feedback-area.visible {
-            display: block;
-            border-left-color: #007bff;
-        }
-
-        .feedback-title {
+        .solution-box {
             font-size: 1.2em;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
             text-align: center;
         }
 
-        .explanation-list {
-            text-align: left;
-            margin: 0;
-            padding-left: 20px;
-            color: #444;
+        .nav-btn { 
+            margin-top: 20px; 
+            background: #2c3e50; 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 15px;
+            font-weight: bold;
         }
-
-        .explanation-list li {
-            margin-bottom: 5px;
-            line-height: 1.5;
-        }
-
-        #next-btn {
-            display: none;
-            margin: 20px auto;
-            padding: 10px 30px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.2em;
-            cursor: pointer;
-        }
-        
-        #progress {
-            text-align: right;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-        .hidden { display: none; }
+        .nav-btn:hover { background: #34495e; color: white; }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Exponentialfunktionen Quiz</h1>
-    <p>Welche Funktionsgleichung gehört zum Graphen?</p>
-</header>
-
-<div id="quiz-container">
-    <div id="progress">Aufgabe <span id="current-q">1</span> von 10</div>
-    
-    <div class="card">
-        <div id="graph-container"></div>
+    <h1>Kosinus-Funktions-Master</h1>
+    <div class="subtitle">
+        Finde die Parameter für: \( f(x) = a \cdot \cos(b(x - c)) + d \)
     </div>
 
-    <div id="feedback-area"></div>
+    <div class="layout-grid">
+        
+        <div class="guide-card">
+            <h3>Anleitung</h3>
+            
+            <div class="guide-step">
+                <span class="guide-title">Schritt 1: Parameter \(d\) (Verschiebung y)</span>
+                Suche die Mitte zwischen Hoch- und Tiefpunkt.
+                $$d = \frac{y_{max} + y_{min}}{2}$$
+            </div>
 
-    <div class="options-grid" id="options-container">
+            <div class="guide-step">
+                <span class="guide-title">Schritt 2: Parameter \(a\) (Amplitude)</span>
+                Miss den Abstand von der Mitte zum Hochpunkt.
+                $$a = y_{max} - d$$
+            </div>
+
+            <div class="guide-step">
+                <span class="guide-title">Schritt 3: Parameter \(b\) (Frequenz)</span>
+                Bestimme die Länge einer Periode \(P\) (Berg zu Berg).
+                $$b = \frac{2\pi}{P}$$
+            </div>
+
+            <div class="guide-step">
+                <span class="guide-title">Schritt 4: Parameter \(c\) (Verschiebung x)</span>
+                Wo ist der Start-Hochpunkt? 
+                <br>Direkt auf der y-Achse: \(c=0\).
+                <br>Rechts davon: \(c > 0\).
+            </div>
         </div>
 
-    <button id="next-btn" onclick="nextQuestion()">Nächste Aufgabe</button>
-</div>
+        <div id="quiz-container" class="task-card">
+            </div>
 
-<div id="end-screen" class="card hidden" style="text-align: center;">
-    <h2>Quiz beendet!</h2>
-    <p>Du hast <span id="final-score"></span> von 10 Aufgaben richtig gelöst.</p>
-    <button class="option-btn" onclick="location.reload()" style="margin: 20px auto; width: auto; padding: 10px 30px;">Neustart</button>
-</div>
+    </div>
 
-<script>
-    // --- Konfiguration der 10 Level mit detaillierten Erklärungen ---
-    const levels = [
-        { 
-            a: 1, b: 2, c: 1, d: 0, 
-            explanation: `
-                <li><b>d = 0:</b> Die Asymptote ist die x-Achse.</li>
-                <li><b>b = 2:</b> Die Basis ist > 1, daher exponentielles Wachstum.</li>
-                <li><b>a = 1:</b> Der Graph geht durch (0|1) und ist nicht gestreckt.</li>`
-        },
-        { 
-            a: 1, b: 0.5, c: 1, d: 0, 
-            explanation: `
-                <li><b>b = 0,5:</b> Die Basis liegt zwischen 0 und 1. Das bedeutet Zerfall (der Graph fällt).</li>
-                <li><b>d = 0:</b> Die Asymptote ist die x-Achse.</li>`
-        },
-        { 
-            a: 1, b: 2, c: 1, d: 3, 
-            explanation: `
-                <li><b>d = 3:</b> Der gesamte Graph ist um 3 nach oben verschoben. Die Asymptote liegt bei y = 3.</li>
-                <li><b>b = 2:</b> Der Graph wächst nach oben weg.</li>`
-        },
-        { 
-            a: -1, b: 2, c: 1, d: 0, 
-            explanation: `
-                <li><b>a = -1:</b> Das Vorzeichen ist negativ. Der Graph ist an der x-Achse gespiegelt und verläuft nach unten.</li>
-                <li><b>b = 2:</b> Die Basis sorgt für Wachstum (in den negativen Bereich).</li>`
-        },
-        { 
-            a: 1, b: 3, c: -1, d: 0, 
-            explanation: `
-                <li><b>c = -1:</b> Das Minus im Exponenten spiegelt den Graphen an der y-Achse. Aus Wachstum wird Zerfall.</li>
-                <li><b>b = 3:</b> Die Kurve ist steiler als bei Basis 2.</li>`
-        },
-        { 
-            a: 2, b: 1.5, c: 1, d: -2, 
-            explanation: `
-                <li><b>d = -2:</b> Die Asymptote ist um 2 nach unten verschoben (y = -2).</li>
-                <li><b>a = 2:</b> Streckung! Der Schnittpunkt mit der y-Achse liegt nicht 1 Einheit, sondern 2 Einheiten über der Asymptote (bei y = 0).</li>`
-        },
-        { 
-            a: -2, b: 2, c: 1, d: 4, 
-            explanation: `
-                <li><b>d = 4:</b> Die Asymptote liegt oben bei y = 4.</li>
-                <li><b>a = -2:</b> Spiegelung und Streckung. Der Graph verläuft unterhalb der Asymptote und startet bei y = 2 (4 - 2).</li>`
-        },
-        { 
-            a: 0.5, b: 4, c: 1, d: 1, 
-            explanation: `
-                <li><b>d = 1:</b> Die Asymptote liegt bei y = 1.</li>
-                <li><b>a = 0,5:</b> Stauchung. Der Graph startet sehr flach, nur 0,5 Einheiten über der Asymptote.</li>
-                <li><b>b = 4:</b> Sehr steiles Wachstum danach.</li>`
-        },
-        { 
-            a: 1, b: 2, c: -1, d: -4, 
-            explanation: `
-                <li><b>d = -4:</b> Die Asymptote liegt tief unten bei y = -4.</li>
-                <li><b>c = -1:</b> Durch das Minus im Exponenten fällt der Graph von links oben kommend zur Asymptote hin ab.</li>`
-        },
-        { 
-            a: -1, b: 0.5, c: 1, d: 2, 
-            explanation: `
-                <li><b>d = 2:</b> Asymptote bei y = 2.</li>
-                <li><b>b = 0,5:</b> Eigentlich Zerfall, aber...</li>
-                <li><b>a = -1:</b> ...durch die Spiegelung steigt der Graph von unten kommend gegen die Asymptote.</li>`
-        }
-    ];
-
-    let currentLevelIndex = 0;
-    let score = 0;
-    let canClick = true;
-
-    // Hilfsfunktion: Latex String generieren
-    function generateLatex(p) {
-        let str = "y = ";
-        if (p.a === -1) str += "-";
-        else if (p.a !== 1) str += p.a + " \\cdot ";
-        
-        str += p.b;
-        str += "^{";
-        if (p.c === -1) str += "-x";
-        else if (p.c !== 1) str += p.c + "x";
-        else str += "x";
-        str += "}";
-        
-        if (p.d > 0) str += " + " + p.d;
-        else if (p.d < 0) str += " - " + Math.abs(p.d);
-        
-        return "$$" + str + "$$";
-    }
-
-    // Hilfsfunktion: Zufällige falsche Parameter erzeugen
-    function generateDistractors(correct) {
-        let options = [];
-        options.push({ ...correct, correct: true }); 
-
-        const variations = [
-            p => ({ ...p, a: -p.a }), // Vorzeichenfehler a
-            p => ({ ...p, d: -p.d }), // Vorzeichenfehler d
-            p => ({ ...p, b: p.b === 2 ? 0.5 : (p.b === 0.5 ? 2 : (p.b + 1)) }), 
-            p => ({ ...p, c: -p.c }), 
-            p => ({ ...p, a: p.d !== 0 ? p.d : p.a + 1, d: p.a }), 
-            p => ({ ...p, d: p.d + 2 }), 
-            p => ({ ...p, a: p.a * 2 }) 
+    <script>
+        // --- Quiz Daten ---
+        const problems = [
+            { a: 2, b: 1, c: 0, d: 1, reason: "Mittelwert zwischen 3 und -1 ist 1 (d=1). Amplitude ist 2. Periode ist 2π (b=1)." },
+            { a: 1, b: 2, c: 0, d: 0, reason: "Periode ist nur π lang, also b = 2π/π = 2." },
+            { a: 3, b: 1, c: 0, d: -2, reason: "Tief verschoben auf d=-2. Große Amplitude a=3." },
+            { a: 1.5, b: 0.5, c: 0, d: 0, reason: "Sehr langgezogene Welle. Periode ist 4π, also b = 0.5." },
+            { a: 1, b: 1, c: Math.PI, d: 0, reason: "Der Hochpunkt ist bei x=π. Also Verschiebung c=π." },
+            { a: 2, b: 1, c: Math.PI/2, d: 1, reason: "Hochpunkt nach rechts verschoben auf π/2." },
+            { a: 0.5, b: 2, c: 0, d: 2, reason: "Kleine Welle (a=0.5), schnell (b=2), weit oben (d=2)." },
+            { a: 2, b: 0.5, c: -Math.PI, d: -1, reason: "Langsame Welle, Startpunkt nach links verschoben (oder weit rechts)." },
+            { a: 1, b: 1, c: 0, d: 3, reason: "Standard-Kosinus, nur hochgeschoben auf d=3." },
+            { a: 1.5, b: 2, c: Math.PI/2, d: -1.5, reason: "Kombination aller Parameter: Schnell, verschoben und Amplitude angepasst." }
         ];
 
-        let usedLatex = new Set();
-        usedLatex.add(generateLatex(correct));
+        let currentProblemIndex = 0;
 
-        let count = 0;
-        let attempt = 0;
-        while (count < 5 && attempt < 50) {
-            let func = variations[attempt % variations.length];
-            let fake = func(correct);
-            let latex = generateLatex(fake);
-            if (!usedLatex.has(latex)) {
-                options.push({ ...fake, correct: false });
-                usedLatex.add(latex);
-                count++;
-            }
-            attempt++;
-        }
-        return options.sort(() => Math.random() - 0.5);
-    }
-
-    function plotGraph(p) {
-        let xValues = [];
-        let yValues = [];
-        let asymptote = [];
-        let step = 0.1;
-        for (let x = -6; x <= 6; x += step) {
-            xValues.push(x);
-            let y = p.a * Math.pow(p.b, p.c * x) + p.d;
-            yValues.push(y);
-            asymptote.push(p.d);
+        // --- Mathe Hilfsfunktionen ---
+        function formatVal(val) {
+            if (val === 0) return 0;
+            if (Math.abs(val - Math.PI) < 0.05) return "\\pi";
+            if (Math.abs(val - Math.PI/2) < 0.05) return "\\frac{\\pi}{2}";
+            if (Math.abs(val - (-Math.PI)) < 0.05) return "-\\pi";
+            return Number(val.toFixed(2));
         }
 
-        let layout = {
-            margin: { t: 20, r: 20, b: 40, l: 40 },
-            xaxis: { title: 'x', zeroline: true, zerolinewidth: 3, gridcolor: '#eee', dtick: 1 },
-            yaxis: { 
-                title: 'y', zeroline: true, zerolinewidth: 3, gridcolor: '#eee',
-                range: [Math.min(-5, p.d - 5), Math.max(10, p.d + 10)]
-            },
-            showlegend: false,
-            hovermode: false 
-        };
-
-        let trace1 = { x: xValues, y: yValues, mode: 'lines', line: { color: '#007bff', width: 3 } };
-        let trace2 = { x: xValues, y: asymptote, mode: 'lines', line: { color: '#ff0000', width: 1, dash: 'dash' } };
-
-        Plotly.newPlot('graph-container', [trace1, trace2], layout, {staticPlot: false, displayModeBar: false});
-    }
-
-    function loadQuestion() {
-         if (currentLevelIndex >= levels.length) {
-            showEndScreen();
-            return;
-        }
-
-        document.getElementById('current-q').innerText = currentLevelIndex + 1;
-        document.getElementById('next-btn').style.display = 'none';
-        document.getElementById('feedback-area').innerHTML = '';
-        document.getElementById('feedback-area').classList.remove('visible');
-        canClick = true;
-
-        const currentParams = levels[currentLevelIndex];
-        plotGraph(currentParams);
-        const options = generateDistractors(currentParams);
-        const container = document.getElementById('options-container');
-        container.innerHTML = '';
-
-        options.forEach((opt) => {
-            const btn = document.createElement('div');
-            btn.className = 'option-btn';
-            btn.innerHTML = generateLatex(opt);
-            btn.dataset.isCorrect = opt.correct; 
+        // Erzeugt LaTeX String für MathJax
+        function generateLatex(a, b, c, d) {
+            let str = "f(x) = ";
             
-            btn.onclick = () => {
-                if (!canClick) return;
-                canClick = false;
+            // a handling
+            if (a === -1) str += "-";
+            else if (a !== 1) str += a;
+            
+            str += "\\cos(";
+            
+            // b handling
+            if (b !== 1) {
+                if (b === 0.5) str += "0.5";
+                else str += b;
+                str += "\\cdot ";
+            }
+
+            // Klammer auf für x-c
+            let innerContent = "x";
+            
+            // c handling
+            if (c !== 0) {
+                if (c > 0) innerContent += " - " + formatVal(c);
+                else innerContent += " + " + formatVal(Math.abs(c));
                 
-                let feedbackHTML = "";
+                if (b !== 1) str += "(" + innerContent + ")";
+                else str += innerContent;
+            } else {
+                 if (b !== 1) str += "x"; 
+                 else str += "x";        
+            }
+            
+            str += ")";
+            
+            // d handling
+            if (d !== 0) {
+                if (d > 0) str += " + " + d;
+                else str += " - " + Math.abs(d);
+            }
+            
+            return `$$${str}$$`;
+        }
+
+        // Erzeugt Falsche Antworten
+        function generateOptions(correct) {
+            let opts = [];
+            opts.push(correct);
+            
+            opts.push({ ...correct, d: correct.d * -1 || 1 }); 
+            opts.push({ ...correct, b: correct.b === 1 ? 2 : (correct.b === 2 ? 0.5 : 1) }); 
+            opts.push({ ...correct, a: correct.a + 1 }); 
+            opts.push({ ...correct, c: correct.c === 0 ? Math.PI/2 : 0 }); 
+            opts.push({ ...correct, a: correct.a === 1 ? 2 : 1, d: correct.d + 1 }); 
+
+            return opts.sort(() => Math.random() - 0.5);
+        }
+
+        // --- Canvas Zeichnen ---
+        function drawGraph(canvasId, p) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            const scaleX = 50; 
+            const scaleY = 40; 
+            const offsetX = 60; 
+            const offsetY = h / 2; 
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Grid
+            ctx.beginPath();
+            ctx.strokeStyle = "#f0f0f0";
+            ctx.lineWidth = 1;
+            
+            for(let y = offsetY; y < h; y+=scaleY) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+            for(let y = offsetY; y > 0; y-=scaleY) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+            
+            const piStep = Math.PI * scaleX / 2; 
+            for(let x = offsetX; x < w; x+=piStep) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+            ctx.stroke();
+
+            // Achsen
+            ctx.beginPath();
+            ctx.strokeStyle = "#333";
+            ctx.lineWidth = 2;
+            ctx.moveTo(0, offsetY); ctx.lineTo(w, offsetY);
+            ctx.moveTo(offsetX, 0); ctx.lineTo(offsetX, h);
+            ctx.stroke();
+
+            // Beschriftung
+            ctx.font = "14px Arial";
+            ctx.fillStyle = "#555";
+            ctx.textAlign = "center";
+            
+            for(let i = -4; i <= 4; i++) {
+                if(i===0) continue;
+                ctx.fillText(i, offsetX - 20, offsetY - (i * scaleY) + 5);
+            }
+            
+            ctx.fillText("π", offsetX + Math.PI*scaleX, offsetY + 20);
+            ctx.fillText("2π", offsetX + 2*Math.PI*scaleX, offsetY + 20);
+
+            // Kurve
+            ctx.beginPath();
+            ctx.strokeStyle = "#e74c3c";
+            ctx.lineWidth = 3;
+            
+            for (let px = 0; px < w; px++) {
+                let x = (px - offsetX) / scaleX;
+                let y = p.a * Math.cos(p.b * (x - p.c)) + p.d;
+                let py = offsetY - (y * scaleY);
+                if (px === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        // --- Hauptlogik ---
+        function loadProblem() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = ''; 
+
+            const p = problems[currentProblemIndex];
+            const correctLatex = generateLatex(p.a, p.b, p.c, p.d);
+            
+            // Header
+            const header = document.createElement('h2');
+            header.innerText = `Aufgabe ${currentProblemIndex + 1}`;
+            header.style.marginTop = "0";
+            container.appendChild(header);
+
+            // Canvas
+            const canvas = document.createElement('canvas');
+            canvas.id = 'graphCanvas';
+            canvas.width = 600;
+            canvas.height = 350; 
+            container.appendChild(canvas);
+
+            // Options
+            const optionsDiv = document.createElement('div');
+            optionsDiv.className = 'options-grid';
+            
+            const options = generateOptions(p);
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                const latex = generateLatex(opt.a, opt.b, opt.c, opt.d);
+                btn.innerHTML = latex; 
                 
-                if (opt.correct) {
-                    btn.classList.add('correct');
-                    feedbackHTML = '<span class="feedback-title" style="color:green">Richtig! Analyse:</span>';
-                    score++;
-                } else {
-                    btn.classList.add('wrong');
-                    feedbackHTML = '<span class="feedback-title" style="color:red">Falsch. Hier ist die Analyse:</span>';
-                    // Richtige Antwort finden und markieren
-                    const all = document.querySelectorAll('.option-btn');
-                    all.forEach(b => {
-                        if (b.dataset.isCorrect === "true") {
-                            b.classList.add('correct');
-                        }
-                    });
-                }
+                btn.onclick = () => {
+                    const allBtns = optionsDiv.querySelectorAll('button');
+                    allBtns.forEach(b => b.disabled = true);
+                    
+                    const feedback = document.getElementById('feedbackArea');
+                    const nextBtn = document.getElementById('nextBtn');
+                    
+                    let message = "";
+                    let cssClass = "";
 
-                // Strukturierte Erklärung hinzufügen
-                feedbackHTML += `<ul class="explanation-list">${currentParams.explanation}</ul>`;
-                
-                const fbArea = document.getElementById('feedback-area');
-                fbArea.innerHTML = feedbackHTML;
-                fbArea.classList.add('visible');
+                    if (opt.a === p.a && opt.b === p.b && opt.c === p.c && opt.d === p.d) {
+                        btn.className = 'correct';
+                        cssClass = 'feedback success';
+                        message = `<strong>Richtig!</strong>`;
+                    } else {
+                        btn.className = 'wrong';
+                        allBtns.forEach(b => {
+                            if(b.innerHTML === correctLatex) b.className = 'correct';
+                        });
+                        cssClass = 'feedback error';
+                        message = `<strong>Leider falsch.</strong>`;
+                    }
 
-                document.getElementById('next-btn').style.display = 'block';
-            };
-            container.appendChild(btn);
-        });
-        MathJax.typesetPromise();
-    }
+                    // Hier fügen wir die Lösung explizit ein
+                    feedback.className = cssClass;
+                    feedback.innerHTML = `
+                        ${message}
+                        <div class="solution-box">
+                            Die Lösung ist:<br>
+                            ${correctLatex}
+                        </div>
+                        <strong>Erklärung:</strong> ${p.reason}
+                    `;
 
-    function nextQuestion() {
-        currentLevelIndex++;
-        loadQuestion();
-    }
+                    feedback.style.display = 'block';
+                    if(nextBtn) nextBtn.style.display = 'block';
+                    
+                    MathJax.typesetPromise([feedback]);
+                };
+                optionsDiv.appendChild(btn);
+            });
+            container.appendChild(optionsDiv);
 
-    function showEndScreen() {
-        document.getElementById('quiz-container').classList.add('hidden');
-        document.getElementById('end-screen').classList.remove('hidden');
-        document.getElementById('final-score').innerText = score;
-    }
+            // Feedback Area
+            const fb = document.createElement('div');
+            fb.id = 'feedbackArea';
+            fb.className = 'feedback';
+            container.appendChild(fb);
 
-    // Start
-    loadQuestion();
+            // Next Button
+            if (currentProblemIndex < problems.length - 1) {
+                const nextBtn = document.createElement('button');
+                nextBtn.id = 'nextBtn';
+                nextBtn.className = 'nav-btn';
+                nextBtn.innerText = "Nächste Aufgabe →";
+                nextBtn.style.display = 'none'; 
+                nextBtn.onclick = () => {
+                    currentProblemIndex++;
+                    loadProblem();
+                };
+                container.appendChild(nextBtn);
+            } else {
+                // Ende
+                 const finishMsg = document.createElement('p');
+                 finishMsg.id = 'nextBtn';
+                 finishMsg.style.display = 'none';
+                 finishMsg.style.textAlign = 'center';
+                 finishMsg.style.fontWeight = 'bold';
+                 finishMsg.innerText = "Glückwunsch! Du hast alle Aufgaben geschafft.";
+                 container.appendChild(finishMsg);
+            }
 
-</script>
+            drawGraph('graphCanvas', p);
+            MathJax.typesetPromise();
+        }
 
+        window.onload = loadProblem;
+
+    </script>
 </body>
 </html>
