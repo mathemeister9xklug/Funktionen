@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mathe-Guide: Quadratische Funktionen</title>
+    <title>Mathe-Übung: Quadratische Funktionen (Analyse & Training)</title>
     
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -11,314 +11,185 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            background-color: #f0f4f8;
+            background-color: #f4f6f9;
             color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
             max-width: 900px;
             margin: 0 auto;
+            padding: 20px;
         }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 40px;
+        h1, h2 { color: #2c3e50; }
+        .analysis-box {
+            background-color: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
         }
         .task-card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            overflow: hidden;
-            border-left: 10px solid #3498db;
-        }
-        .task-header {
-            background-color: #eaf2f8;
             padding: 20px;
-            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-top: 5px solid #607d8b;
         }
         .task-title {
-            font-size: 1.2em;
             font-weight: bold;
-            color: #2980b9;
+            font-size: 1.1em;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .original-text {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #fff;
-            padding: 15px;
-            border: 1px dashed #bbb;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            color: #555;
-            font-size: 0.95em;
+        .tag {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 12px;
+            color: white;
+            font-weight: normal;
         }
-        .guide-section {
-            padding: 25px;
-        }
-        .step {
-            margin-bottom: 15px;
-            padding-left: 15px;
-            border-left: 3px solid #27ae60;
-        }
-        .step-title {
-            font-weight: bold;
-            color: #27ae60;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .tip {
-            background-color: #fff3cd;
-            color: #856404;
+        .tag-calc { background-color: #e67e22; }
+        .tag-model { background-color: #27ae60; }
+        .tag-lgs { background-color: #8e44ad; }
+        
+        details {
+            margin-top: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             padding: 10px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            margin-top: 10px;
-            border: 1px solid #ffeeba;
         }
-        /* Farben für verschiedene Aufgaben */
-        .card-5 { border-left-color: #3498db; }
-        .card-6 { border-left-color: #9b59b6; }
-        .card-7 { border-left-color: #e67e22; }
-        .card-8 { border-left-color: #e74c3c; }
-        .card-9 { border-left-color: #16a085; }
+        summary {
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+        }
+        .result {
+            margin-top: 10px;
+            color: #d32f2f;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+    <h1>Analyse & Trainingsblatt</h1>
 
-    <h1>📝 Schritt-für-Schritt Anleitung: Quadratische Funktionen</h1>
-
-    <div class="task-card card-5">
-        <div class="task-header">
-            <div class="task-title">Aufgabe 5: Eigenschaften von quadratischen Funktionen</div>
-            <div class="original-text">
-                a) Sei \( f \) eine quadratische Funktion, deren Graph in der Abbildung zu sehen ist. Gib für die Funktionen \( f \) mindestens zwei Eigenschaften an.<br><br>
-                b) Sei \( g \) eine weitere quadratische Funktion mit der Funktionsgleichung \( g(x) = (x + 2)^2 - 1 \).<br>
-                Gib für die Funktionen \( g \) folgende Eigenschaften an:<br>
-                - Scheitelpunkt<br>
-                - Anzahl der Nullstellen<br>
-                - Wertebereich<br>
-                - Schnittpunkt P mit der y-Achse<br>
-                - Monotonie (fallend und steigend).
-            </div>
-        </div>
-        <div class="guide-section">
-            <h3>So löst du Teilaufgabe a) (Graph ablesen):</h3>
-            <div class="step">
-                <span class="step-title">Schritt 1: Scheitelpunkt finden</span>
-                Schaue auf das Bild. Suche den tiefsten Punkt der Kurve (die Spitze der Parabel). Lies die x-Koordinate und die y-Koordinate dieses Punktes ab. Das ist eine Eigenschaft ("Der Scheitelpunkt liegt bei...").
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 2: Öffnung bestimmen</span>
-                Zeigt die Öffnung der Parabel nach oben (wie ein Glas) oder nach unten (wie ein Berg)? Da sie nach oben offen ist und "dünner" als eine Normalparabel aussieht, ist sie "gestreckt".
-            </div>
-
-            <h3>So löst du Teilaufgabe b) (Rechnung mit g(x)):</h3>
-            <div class="step">
-                <span class="step-title">Scheitelpunkt (S)</span>
-                Die Funktion steht in der Scheitelpunktform:
-                $$ f(x) = a(x + d)^2 + e $$
-                Du kannst den Scheitelpunkt direkt ablesen. <br>
-                <strong>Wichtig:</strong> Bei der Zahl in der Klammer musst du das Vorzeichen umdrehen! Die Zahl dahinter (\(e\)) bleibt, wie sie ist.
-            </div>
-            <div class="step">
-                <span class="step-title">Anzahl der Nullstellen</span>
-                Überlege logisch: Der Scheitelpunkt liegt bei \( y = -1 \) (also unter der x-Achse). Die Parabel ist nach oben geöffnet (da kein Minus vor der Klammer steht). Wenn du im Keller startest und nach oben gehst, musst du den Boden (die x-Achse) durchbrechen. Wie oft passiert das bei einer Parabel?
-            </div>
-            <div class="step">
-                <span class="step-title">Wertebereich</span>
-                Der Wertebereich sagt dir, welche y-Werte (Höhen) die Funktion erreichen kann.
-                Startpunkt ist der tiefste Punkt (y-Wert des Scheitelpunkts). Von da geht es bis unendlich nach oben. Man schreibt das als Intervall:
-                $$ W = [y_{Scheitel}; \infty[ $$
-            </div>
-            <div class="step">
-                <span class="step-title">Schnittpunkt mit der y-Achse</span>
-                Hier musst du rechnen. Der Schnittpunkt mit der y-Achse ist immer dort, wo \( x = 0 \) ist.
-                Setze also für jedes \( x \) in der Gleichung eine 0 ein und rechne das Ergebnis aus:
-                $$ g(0) = (0 + 2)^2 - 1 $$
-            </div>
-            <div class="step">
-                <span class="step-title">Monotonie</span>
-                Stell dir vor, du läufst auf der Parabel von links nach rechts.
-                Bis zum Scheitelpunkt geht es bergab (streng monoton fallend).
-                Ab dem Scheitelpunkt geht es bergauf (streng monoton steigend).
-                Gib die x-Bereiche dafür an (z.B. "für \( x < ... \)" und "für \( x > ... \)").
-            </div>
-        </div>
+    <div class="analysis-box">
+        <h3>📊 Analyse der Lerninhalte</h3>
+        <p>Basierend auf deinen Unterlagen deckt dieses Blatt folgende Kompetenzen ab:</p>
+        <ul>
+            <li><strong>Formen umwandeln:</strong> Sicherer Wechsel zwischen Scheitelpunktform und Normalform (Quadratische Ergänzung).</li>
+            <li><strong>Gleichungssysteme (LGS):</strong> Aufstellen von Funktionsgleichungen aus 3 Punkten (Gauß-Verfahren/Einsetzungsverfahren).</li>
+            <li><strong>Nullstellen & Vieta:</strong> Nutzung der pq-Formel und des Satzes von Vieta zur Überprüfung.</li>
+            <li><strong>Modellierung:</strong> Sachaufgaben (z.B. Brücken) durch geschicktes Legen des Koordinatensystems lösen.</li>
+        </ul>
     </div>
 
-    <div class="task-card card-6">
-        <div class="task-header">
-            <div class="task-title">Aufgabe 6: Umformen in die Scheitelpunktform</div>
-            <div class="original-text">
-                Forme von der Normalform in die Scheitelpunktform um!<br>
-                a. \( f(x) = x^2 + 12x + 40 \)<br>
-                b. \( f(x) = 5x^2 - 40x + 91 \)
-            </div>
+    <div class="task-card">
+        <div class="task-title">
+            1. Umformungen & Eigenschaften
+            <span class="tag tag-calc">Basis & Umformung</span>
         </div>
-        <div class="guide-section">
-            <h3>Strategie: Quadratische Ergänzung</h3>
-            <div class="tip">Ziel ist es, eine Klammer mit "hoch 2" zu erzeugen: \( (x + d)^2 + e \)</div>
-            
-            <h4>Zu Aufgabe a):</h4>
-            <div class="step">
-                <span class="step-title">Schritt 1: Die "Hälfte im Quadrat" finden</span>
-                Nimm die Zahl vor dem \( x \) (hier die 12). Teile sie durch 2 (das ergibt 6). Quadriere das Ergebnis (\( 6^2 = 36 \)).
+        <p>Gegeben ist die Funktion in Normalform: $$ f(x) = 2x^2 - 12x + 10 $$</p>
+        <ol>
+            <li>Wandle die Funktion durch quadratische Ergänzung in die Scheitelpunktform um.</li>
+            <li>Gib den Scheitelpunkt \(S\) an.</li>
+            <li>Bestimme den Schnittpunkt mit der y-Achse rechnerisch.</li>
+        </ol>
+        <details>
+            <summary>Kontrollwerte anzeigen (Kein Lösungsweg)</summary>
+            <div class="result">
+                1. SF: \( f(x) = 2(x-3)^2 - 8 \) <br>
+                2. Scheitelpunkt: \( S(3 \mid -8) \) <br>
+                3. y-Achsenabschnitt: \( P_y(0 \mid 10) \)
             </div>
-            <div class="step">
-                <span class="step-title">Schritt 2: Ergänzen</span>
-                Füge die 36 in deine Gleichung ein, indem du sie einmal addierst und sofort wieder abziehst (damit sich der Wert nicht ändert):
-                $$ x^2 + 12x + 36 - 36 + 40 $$
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 3: Binomische Formel anwenden</span>
-                Die ersten drei Teile \( (x^2 + 12x + 36) \) werden zur Klammer \( (x + 6)^2 \).
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 4: Zusammenfassen</span>
-                Rechne den Rest hinten zusammen (\( -36 + 40 \)). Fertig!
-            </div>
-
-            <h4>Zu Aufgabe b) (Achtung, schwieriger!):</h4>
-            <div class="step">
-                <span class="step-title">Schritt 1: Ausklammern</span>
-                Die 5 vor dem \( x^2 \) stört. Klammere die 5 aus den ersten beiden Summanden (\( x^2 \) und \( -40x \)) aus. Die 91 lässt du erst mal hinten stehen.
-                $$ 5 \cdot [x^2 - 8x] + 91 $$
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 2: Ergänzen in der Klammer</span>
-                Nimm die Zahl vor dem \( x \) in der Klammer (die 8). Hälfte davon ist 4. Quadrat ist 16.
-                Addiere und subtrahiere 16 <strong>innerhalb</strong> der eckigen Klammer.
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 3: Binom bilden</span>
-                Forme in der eckigen Klammer das Binom \( (x - 4)^2 \). Die abgezogene -16 steht noch immer in der eckigen Klammer!
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 4: Ausmultiplizieren</span>
-                Löse die eckige Klammer auf, indem du die 5 davor wieder mit dem Binom UND mit der hinteren Zahl (-16) malnimmst.
-                $$ 5 \cdot (x-4)^2 + 5 \cdot (-16) + 91 $$
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 5: Ende</span>
-                Verrechne die hinteren Zahlen.
-            </div>
-        </div>
+        </details>
     </div>
 
-    <div class="task-card card-7">
-        <div class="task-header">
-            <div class="task-title">Aufgabe 7: Zeichnen und Berechnen</div>
-            <div class="original-text">
-                Zeichne die Graphen der quadratischen Funktionen \(f, g, h\) und \(l\) in ein Koordinatensystem. Beschrifte die Parabeln. Berechne nötige Umformungsschritte schriftlich.<br>
-                a) \( f(x) = (x + 4{,}5)^2 + 1 \)<br>
-                b) \( g \) ist eine verschobene Normalparabel und besitzt den Scheitelpunkt \( S(3|1) \). Gib die entsprechende Funktionsgleichung an.<br>
-                c) \( h(x) = x^2 - 4x + 2 \)<br>
-                d) \( l(x) = 3x^2 + 6x \)
-            </div>
+    <div class="task-card">
+        <div class="task-title">
+            2. Rekonstruktion aus 3 Punkten
+            <span class="tag tag-lgs">LGS Lösen</span>
         </div>
-        <div class="guide-section">
-            <div class="tip"><strong>Genereller Tipp zum Zeichnen:</strong> Du brauchst immer den Scheitelpunkt! Wenn du ihn hast, gehe von dort aus: "1 nach rechts, 1 nach oben (bei Normalparabel)" oder "1 nach rechts, 3 nach oben (bei \( 3x^2 \))" usw.</div>
-            
-            <div class="step">
-                <span class="step-title">Zu a)</span>
-                Hier steht schon die Scheitelpunktform. Lies den Scheitelpunkt ab (Vorzeichen in der Klammer umdrehen!) und zeichne ihn ein. Es ist eine Normalparabel.
+        <p>Der Graph einer quadratischen Funktion der Form \( f(x) = ax^2 + bx + c \) verläuft durch die folgenden drei Punkte:</p>
+        <p style="text-align: center;">
+            \( A(0 \mid 4) \),  \( B(1 \mid 7) \),  \( C(2 \mid 16) \)
+        </p>
+        <p>Stelle das lineare Gleichungssystem auf und berechne die Funktionsgleichung.</p>
+        <details>
+            <summary>Kontrollwerte anzeigen</summary>
+            <div class="result">
+                Parameter: \( a = 3, \quad b = 0, \quad c = 4 \) <br>
+                Funktionsgleichung: \( f(x) = 3x^2 + 4 \)
             </div>
-            <div class="step">
-                <span class="step-title">Zu b)</span>
-                Du hast den Scheitelpunkt \( S(3|1) \).
-                Setze die Zahlen einfach in die Schablone ein:
-                $$ g(x) = (x - d)^2 + e $$
-                Zeichne den Punkt \( (3|1) \) ein und male eine Normalparabel.
-            </div>
-            <div class="step">
-                <span class="step-title">Zu c)</span>
-                Das ist die Normalform. Du kannst den Scheitelpunkt nicht ablesen.
-                Führe eine <strong>quadratische Ergänzung</strong> durch (genau wie in Aufgabe 6a erklärt), um die Scheitelpunktform zu bekommen. Dann zeichnen.
-            </div>
-            <div class="step">
-                <span class="step-title">Zu d)</span>
-                Hier fehlt die Zahl ohne \( x \) am Ende.
-                Du musst trotzdem den Scheitelpunkt finden.
-                Klammere die 3 aus: \( l(x) = 3(x^2 + 2x) \).
-                Mache in der Klammer die quadratische Ergänzung (Hälfte von 2 ist 1...).
-            </div>
-        </div>
+        </details>
     </div>
 
-    <div class="task-card card-8">
-        <div class="task-header">
-            <div class="task-title">Aufgabe 8: Funktionsgleichung aus zwei Punkten</div>
-            <div class="original-text">
-                Gegeben sind die Punkte \(P\) und \(Q\). Ermittle \(p\) und \(q\) derart, dass der Graph der quadratischen Funktion \(f\) mit \( f(x) = x^2 + px + q \) durch \(P\) und \(Q\) verläuft.<br>
-                \( P(-5|3), \quad Q(3|43) \)
-            </div>
+    <div class="task-card">
+        <div class="task-title">
+            3. Nullstellen & Satz von Vieta
+            <span class="tag tag-calc">pq-Formel & Vieta</span>
         </div>
-        <div class="guide-section">
-            <h3>Strategie: Lineares Gleichungssystem (LGS)</h3>
-            <div class="step">
-                <span class="step-title">Schritt 1: Einsetzen</span>
-                Ein Punkt besteht immer aus \( (x | y) \). Und \( f(x) \) ist nichts anderes als \( y \).
-                <br>Gleichung I (für Punkt P): Setze für \( y \) die 3 ein und für alle \( x \) die -5. (Achtung: \( (-5)^2 = 25 \)).
-                <br>Gleichung II (für Punkt Q): Setze für \( y \) die 43 ein und für alle \( x \) die 3.
+        <p>Gegeben ist die Gleichung: $$ x^2 - 2x - 15 = 0 $$</p>
+        <ol>
+            <li>Berechne die Lösungen \( x_1 \) und \( x_2 \) mithilfe der pq-Formel.</li>
+            <li>Überprüfe dein Ergebnis mithilfe des Satzes von Vieta. (Zeige, dass \( x_1+x_2 = -p \) und \( x_1 \cdot x_2 = q \) gilt).</li>
+        </ol>
+        <details>
+            <summary>Kontrollwerte anzeigen</summary>
+            <div class="result">
+                Lösungen: \( x_1 = 5, \quad x_2 = -3 \) <br>
+                Vieta-Check:<br>
+                Summe: \( 5 + (-3) = 2 \) (das ist \(-p\)) <br>
+                Produkt: \( 5 \cdot (-3) = -15 \) (das ist \(q\))
             </div>
-            <div class="step">
-                <span class="step-title">Schritt 2: Gleichungssystem aufstellen</span>
-                Du hast jetzt zwei Gleichungen, die beide \( p \) und \( q \) enthalten.
-                $$ I: \quad 3 = 25 - 5p + q $$
-                $$ II: \quad 43 = 9 + 3p + q $$
-                Sortiere sie so, dass die Zahlen auf einer Seite stehen und \( p/q \) auf der anderen.
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 3: Lösen</span>
-                Am einfachsten ist das <strong>Subtraktionsverfahren</strong>:
-                Rechne (Gleichung II) minus (Gleichung I).
-                Dadurch fällt das \( q \) weg (weil \( q - q = 0 \) ist).
-                Du erhältst eine Gleichung, in der nur noch \( p \) vorkommt. Löse nach \( p \) auf.
-            </div>
-            <div class="step">
-                <span class="step-title">Schritt 4: q berechnen</span>
-                Setze dein gefundenes \( p \) in eine der beiden Ursprungsgleichungen ein und rechne \( q \) aus.
-            </div>
-        </div>
+        </details>
     </div>
 
-    <div class="task-card card-9">
-        <div class="task-header">
-            <div class="task-title">Aufgabe 9: Parameteraufgabe (Genau eine Nullstelle)</div>
-            <div class="original-text">
-                Eine Parabel der Funktion \(f\) hat die Gleichung \( f(x) = x^2 + 4x + q \). Ersetze das \(q\) in dieser Gleichung durch eine Zahl, so dass die zugehörige Parabel genau eine Nullstelle hat. Begründe deine Entscheidung.
-            </div>
+    <div class="task-card">
+        <div class="task-title">
+            4. Parameter bestimmen (2 Punkte)
+            <span class="tag tag-lgs">LGS klein</span>
         </div>
-        <div class="guide-section">
-            <div class="step">
-                <span class="step-title">Überlegung 1: Was bedeutet "genau eine Nullstelle"?</span>
-                Normalerweise schneidet eine Parabel die Achse zweimal oder gar nicht.
-                Nur wenn der <strong>Scheitelpunkt genau auf der x-Achse</strong> liegt (also berührt), gibt es nur eine Nullstelle.
+        <p>Ermittle \( p \) und \( q \) für die Funktion \( f(x) = x^2 + px + q \), sodass der Graph durch die Punkte \( P(-2 \mid 0) \) und \( Q(4 \mid 0) \) verläuft.</p>
+        <p><em>Tipp: Erstelle ein LGS mit zwei Gleichungen oder nutze die Nullstellenform.</em></p>
+        <details>
+            <summary>Kontrollwerte anzeigen</summary>
+            <div class="result">
+                Werte: \( p = -2, \quad q = -8 \) <br>
+                Funktion: \( f(x) = x^2 - 2x - 8 \)
             </div>
-            <div class="step">
-                <span class="step-title">Weg A: Über die Binomische Formel (Der einfache Weg)</span>
-                Damit \( x^2 + 4x + q = 0 \) genau eine Lösung hat, muss es sich um eine Binomische Formel handeln, also \( (x + d)^2 = 0 \).
-                Schau dir den Mittelteil \( 4x \) an. Das ist \( 2 \cdot a \cdot b \).
-                Welche Zahl muss hinten bei \( q \) stehen, damit \( x^2 + 4x + \dots \) eine vollständige binomische Formel ergibt? (Denk an die quadratische Ergänzung: Hälfte von 4, ins Quadrat).
-            </div>
-            <div class="step">
-                <span class="step-title">Weg B: Über die pq-Formel (Der rechnerische Weg)</span>
-                Wenn du die pq-Formel anwendest, steht unter der Wurzel (die Diskriminante):
-                $$ D = \left(\frac{p}{2}\right)^2 - q $$
-                Damit es nur <strong>ein</strong> Ergebnis gibt, muss unter der Wurzel eine <strong>Null</strong> herauskommen.
-                Setze also:
-                $$ \left(\frac{4}{2}\right)^2 - q = 0 $$
-                und löse nach \( q \) auf.
-            </div>
-        </div>
+        </details>
     </div>
 
-</div>
+    <div class="task-card">
+        <div class="task-title">
+            5. Modellierung: Der Torbogen
+            <span class="tag tag-model">Sachaufgabe</span>
+        </div>
+        <p>Ein Torbogen hat die Form einer nach unten geöffneten Parabel. Der Boden entspricht der x-Achse.</p>
+        <ul>
+            <li>Der Bogen ist am Boden genau 6 Meter breit.</li>
+            <li>Die maximale Höhe des Bogens (in der Mitte) beträgt 4,5 Meter.</li>
+        </ul>
+        <ol>
+            <li>Lege den Scheitelpunkt auf die y-Achse (Ursprung des Koordinatensystems in der Mitte der Basis). Bestimme die Funktionsgleichung.</li>
+            <li>Ein Fahrzeug ist 3 Meter hoch. Wie breit darf es maximal sein, um theoretisch (mittig) durchzufahren?</li>
+        </ol>
+        <details>
+            <summary>Kontrollwerte anzeigen</summary>
+            <div class="result">
+                1. Funktion: \( f(x) = -0{,}5x^2 + 4{,}5 \) <br>
+                (Ansatz: \(S(0|4{,}5)\) und Nullstelle bei \(x=3\)) <br><br>
+                2. Maximale Breite bei Höhe 3m:<br>
+                Berechne \(x\) für \(y=3\): \( 3 = -0{,}5x^2 + 4{,}5 \)<br>
+                Ergebnis \( x \approx \pm 1{,}73 \). <br>
+                Gesamtbreite \( \approx 3{,}46 \) Meter.
+            </div>
+        </details>
+    </div>
 
 </body>
 </html>
